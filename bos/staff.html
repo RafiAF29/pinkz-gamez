@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Kelola Staff — Pinkz Gamez Boss</title><link rel="stylesheet" href="../css/main.css"/></head>
+<body>
+<div id="sb-ov" class="sb-overlay"></div>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"><div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Boss</div></div><nav class="sb-nav" id="sb-nav"></nav><div class="sb-footer"><a href="../admin/login.html" onclick="doLogout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> Log Out</a></div></aside>
+  <div class="main">
+    <div class="topbar"><div class="tb-title"><h1>Kelola Staff</h1><p>Manajemen akun admin &amp; staff</p></div><div class="tb-right"><div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge boss" id="tb-role-badge">Boss</span><div class="tb-avatar" id="tb-avatar">?</div></div><button class="mob-btn" id="mob-btn"><svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="btn btn-primary btn-sm btn-pill" onclick="openM('m-add')">+ Tambah Staff</button></div></div>
+    <div class="page">
+      <div class="stats" style="margin-bottom:1.4rem"><div class="stat"><div class="stat-label">Total</div><div class="stat-value" id="s-tot">0</div></div><div class="stat"><div class="stat-label">Aktif</div><div class="stat-value" id="s-ak" style="color:var(--green)">0</div></div><div class="stat"><div class="stat-label">Nonaktif</div><div class="stat-value" id="s-nk" style="color:var(--red)">0</div></div><div class="stat"><div class="stat-label">Boss</div><div class="stat-value" id="s-bs" style="color:var(--orange)">0</div></div></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><th>Bergabung</th><th>Aksi</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="m-add"><div class="modal"><button class="modal-x" onclick="closeM('m-add')">✕</button><div class="modal-title">👤 Tambah Staff</div><div class="row2"><div class="fg"><label>Nama</label><input id="a-n" placeholder="Nama staff..."/></div><div class="fg"><label>Email</label><input type="email" id="a-e" placeholder="staff@spacex.id"/></div></div><div class="row2"><div class="fg"><label>Password</label><input type="password" id="a-p" placeholder="Min. 6 karakter"/></div><div class="fg"><label>Role</label><select id="a-r"><option value="staff">Staff / Admin</option><option value="boss">Boss</option></select></div></div><button class="btn btn-primary btn-full" onclick="addS()">✅ Tambah</button></div></div>
+<div class="modal-bg" id="m-edit"><div class="modal" style="max-width:380px"><button class="modal-x" onclick="closeM('m-edit')">✕</button><div class="modal-title">✏️ Edit Staff</div><input type="hidden" id="e-id"/><div class="fg"><label>Nama</label><input id="e-n"/></div><div class="row2"><div class="fg"><label>Role</label><select id="e-r"><option value="staff">Staff</option><option value="boss">Boss</option></select></div><div class="fg"><label>Status</label><select id="e-a"><option value="1">Aktif</option><option value="0">Nonaktif</option></select></div></div><button class="btn btn-primary btn-full" onclick="saveE()">✅ Simpan</button></div></div>
+<div id="toast"></div>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+  let s;
+  if (typeof requireAdminAsync === 'function' && API_ENABLED) {
+    s = await requireAdminAsync();
+    if (!s) return;
+  } else {
+    s = requireAdmin();
+    if (!s) return;
+  }
+  if (s.role !== 'boss') { location.href='../admin/dashboard.html'; return; }
+  fillAdminUser(s); buildSidebar(s.role,'bos/staff.html'); initMobSidebar();
+  const SK='sx_staff_list';
+  const DEF=[{id:'sf1',nama:'Admin 1',email:'staff@spacex.id',role:'staff',aktif:true,joined:'2026-01-01'},{id:'sf2',nama:'Bos Rental',email:'boss@spacex.id',role:'boss',aktif:true,joined:'2025-01-01'}];
+  function gS(){ try{ return JSON.parse(localStorage.getItem(SK)||'null')||DEF; }catch{ return DEF; } }
+  function sS(d){ localStorage.setItem(SK,JSON.stringify(d)); apiSync('PUT','/api/state/staff',{value:d}); }
+  if(!localStorage.getItem(SK)) sS(DEF);
+  let cnt=3;
+  async function render(){
+    await fetchState();
+    const sf=gS();
+    document.getElementById('s-tot').textContent=sf.length;
+    document.getElementById('s-ak').textContent=sf.filter(x=>x.aktif).length;
+    document.getElementById('s-nk').textContent=sf.filter(x=>!x.aktif).length;
+    document.getElementById('s-bs').textContent=sf.filter(x=>x.role==='boss').length;
+    document.getElementById('tbody').innerHTML=sf.map(x=>`<tr>
+      <td><strong>${x.nama}</strong></td><td style="font-size:.82rem">${x.email}</td>
+      <td>${x.role==='boss'?'<span class="badge badge-yellow">👑 Boss</span>':'<span class="badge badge-blue">👨‍💼 Staff</span>'}</td>
+      <td>${x.aktif?'<span class="badge badge-green">Aktif</span>':'<span class="badge badge-red">Nonaktif</span>'}</td>
+      <td style="font-size:.76rem;color:var(--text3)">${fDate(x.joined)}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-ghost btn-sm" onclick="openE('${x.id}')">✏️</button>
+        ${x.email!=='boss@spacex.id'?`<button class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2)" onclick="togA('${x.id}')">${x.aktif?'🔒':'🔓'}</button><button class="btn btn-danger btn-sm" onclick="del('${x.id}')">🗑</button>`:'<span style="font-size:.7rem;color:var(--text3)">Protected</span>'}
+      </td></tr>`).join('');
+  }
+  async function addS(){ const n=document.getElementById('a-n').value.trim(), e=document.getElementById('a-e').value.trim().toLowerCase(), p=document.getElementById('a-p').value, r=document.getElementById('a-r').value; if(!n||!e||!p){ toast('Lengkapi semua kolom!'); return; } if(p.length<6){ toast('Password min 6 karakter!'); return; } const sf=gS(); if(sf.find(x=>x.email===e)){ toast('Email sudah ada!'); return; } if(API_ENABLED){ try{ const data=await apiAsync('POST','/api/staff',{name:n,email:e,password:p,role:r}); applyServerState(data.state); closeM('m-add'); toast('Staff ditambahkan!'); render(); return; }catch(err){ toast(err.message||'Gagal tambah staff'); return; } } sf.push({id:'sf'+cnt++,nama:n,email:e,role:r,aktif:true,joined:today()}); sS(sf); closeM('m-add'); toast('Staff ditambahkan!'); render(); }
+  function openE(id){ const x=gS().find(s=>s.id===id); if(!x) return; document.getElementById('e-id').value=id; document.getElementById('e-n').value=x.nama; document.getElementById('e-r').value=x.role; document.getElementById('e-a').value=x.aktif?'1':'0'; openM('m-edit'); }
+  function saveE(){ const id=document.getElementById('e-id').value, n=document.getElementById('e-n').value.trim(); if(!n){ toast('❌ Isi nama!'); return; } const sf=gS(), idx=sf.findIndex(x=>x.id===id); if(idx===-1) return; sf[idx]={...sf[idx],nama:n,role:document.getElementById('e-r').value,aktif:document.getElementById('e-a').value==='1'}; sS(sf); closeM('m-edit'); toast('✅ Diperbarui!'); render(); }
+  function togA(id){ const sf=gS(), idx=sf.findIndex(x=>x.id===id); if(idx===-1) return; sf[idx].aktif=!sf[idx].aktif; sS(sf); toast(sf[idx].aktif?'🔓 Aktif':'🔒 Nonaktif'); render(); }
+  function del(id){ if(!confirm('Hapus?')) return; sS(gS().filter(x=>x.id!==id)); toast('🗑 Dihapus'); render(); }
+  render();
+})();
+</script>
+</body>
+</html>

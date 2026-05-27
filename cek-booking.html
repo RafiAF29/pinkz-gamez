@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Cek Booking — Pinkz Gamez</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .cek-wrap{ min-height:100vh; display:flex; align-items:flex-start; justify-content:center; padding:2rem 1rem; padding-top:6rem; }
+    .cek-card{ width:100%; max-width:520px; }
+    .cek-title{ font-size:1.5rem; font-weight:900; margin-bottom:.3rem; }
+    .cek-sub{ color:var(--text2); font-size:.87rem; margin-bottom:1.8rem; }
+    .bk-result{ margin-top:1.2rem; display:flex; flex-direction:column; gap:.8rem; }
+    .bk-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--r2); padding:1.2rem; }
+    .bk-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.8rem; gap:.5rem; }
+    .bk-card-id{ font-size:.7rem; color:var(--text3); font-family:monospace; }
+    .bk-card-body{ display:grid; grid-template-columns:1fr 1fr; gap:.35rem .8rem; margin-bottom:.8rem; }
+    .bk-field{ display:flex; flex-direction:column; gap:2px; }
+    .bk-lbl{ font-size:.65rem; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; }
+    .bk-val{ font-size:.83rem; font-weight:600; }
+    .bk-total{ color:var(--pink-l); font-size:1rem; font-weight:900; }
+    .bk-actions{ display:flex; gap:.5rem; flex-wrap:wrap; }
+    .ps-pending{ display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;background:rgba(245,158,11,.12);color:var(--orange);border:1px solid rgba(245,158,11,.25) }
+    .ps-paid{    display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25) }
+    .ps-rejected,.ps-expired,.ps-cancelled{ display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;background:rgba(100,116,139,.12);color:var(--text3);border:1px solid rgba(100,116,139,.25) }
+    .empty-state{ text-align:center; padding:2.5rem 1rem; color:var(--text3); }
+    .empty-ico{ font-size:2.5rem; margin-bottom:.6rem; }
+    .search-form{ background:var(--card); border:1px solid var(--border); border-radius:var(--r2); padding:1.4rem; margin-bottom:1rem; }
+  </style>
+</head>
+<body>
+<nav class="pub-nav">
+  <div class="pub-brand">
+    <div class="pub-brand-ico">🎮</div>
+    <span class="pub-brand-name">Pinkz Gamez</span>
+  </div>
+  <ul class="pub-links">
+    <li><a href="index.html">Beranda</a></li>
+    <li><a href="booking.html">Booking</a></li>
+  </ul>
+</nav>
+
+<div class="cek-wrap">
+  <div class="cek-card">
+    <div class="cek-title">📋 Cek Status Booking</div>
+    <div class="cek-sub">Masukkan nama dan nomor WhatsApp yang kamu gunakan saat booking.</div>
+
+    <div class="search-form">
+      <div class="fg">
+        <label>Nama Lengkap</label>
+        <input type="text" id="s-nama" placeholder="Nama sesuai saat booking..." autocomplete="name"/>
+      </div>
+      <div class="fg">
+        <label>Nomor WhatsApp</label>
+        <input type="tel" id="s-wa" placeholder="08xxxxxxxxxx" autocomplete="tel"
+               onkeydown="if(event.key==='Enter') cekBooking()"/>
+      </div>
+      <button class="btn btn-primary btn-full btn-pill" id="btn-cek" onclick="cekBooking()">
+        🔍 Cek Booking
+      </button>
+    </div>
+
+    <div id="result-area"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="js/app.js"></script>
+<script>
+const STATUS_CLS = {
+  pending:   'ps-pending',
+  paid:      'ps-paid',
+  rejected:  'ps-rejected',
+  expired:   'ps-expired',
+  cancelled: 'ps-cancelled',
+};
+const STATUS_LBL = {
+  pending:   '⏳ Menunggu Verifikasi',
+  paid:      '✅ Lunas',
+  rejected:  '❌ Ditolak',
+  expired:   '🕐 Kedaluwarsa',
+  cancelled: '✖️ Dibatalkan',
+};
+
+async function cekBooking() {
+  const nama = document.getElementById('s-nama').value.trim();
+  const wa   = document.getElementById('s-wa').value.trim();
+  const btn  = document.getElementById('btn-cek');
+  const area = document.getElementById('result-area');
+
+  if (!nama || nama.length < 2) { toast('Isi nama lengkap', 'warning'); return; }
+  if (!wa || wa.replace(/\D/g,'').length < 9) { toast('Nomor WA tidak valid', 'warning'); return; }
+
+  btn.disabled = true; btn.textContent = '⏳ Mencari...';
+  area.innerHTML = '';
+
+  try {
+    const data = await apiAsync('POST', '/api/bookings/search', { nama, wa });
+    const bookings = data?.bookings || [];
+
+    if (!bookings.length) {
+      area.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-ico">📭</div>
+          <div style="font-weight:700;margin-bottom:.3rem">Booking tidak ditemukan</div>
+          <div style="font-size:.82rem">Pastikan nama dan nomor WA sesuai saat booking.</div>
+          <a href="booking.html" class="btn btn-primary btn-pill" style="margin-top:1rem;display:inline-flex">
+            🎮 Buat Booking Baru
+          </a>
+        </div>`;
+      return;
+    }
+
+    // Render hasil
+    const container = document.createElement('div');
+    container.className = 'bk-result';
+
+    bookings.forEach(b => {
+      const unitNama  = b.unitNama  || b.unit_nama  || '—';
+      const tglStr    = b.tglStr    || b.tgl_str    || b.tgl || '';
+      const timeRange = b.timeRange || b.time_range || '—';
+      const dur       = b.dur || 0;
+      const bonusJam  = b.bonusJam  || b.bonus_jam  || 0;
+      const stsCls    = STATUS_CLS[b.payment_status] || 'ps-pending';
+      const stsLbl    = STATUS_LBL[b.payment_status] || b.payment_status;
+      const fnbArr    = b.fnb || [];
+
+      const card = document.createElement('div');
+      card.className = 'bk-card';
+      card.innerHTML = `
+        <div class="bk-card-head">
+          <div>
+            <div style="font-weight:700;font-size:.92rem">${esc(unitNama)}</div>
+            <div class="bk-card-id">${esc(b.id)}</div>
+          </div>
+          <span class="${stsCls}">${stsLbl}</span>
+        </div>
+        <div class="bk-card-body">
+          <div class="bk-field"><span class="bk-lbl">Tanggal</span><span class="bk-val">${esc(tglStr)}</span></div>
+          <div class="bk-field"><span class="bk-lbl">Waktu</span><span class="bk-val">${esc(timeRange)}</span></div>
+          <div class="bk-field"><span class="bk-lbl">Durasi</span><span class="bk-val">${dur} jam${bonusJam > 0 ? ` + ${bonusJam} bonus` : ''}</span></div>
+          <div class="bk-field"><span class="bk-lbl">Total</span><span class="bk-val bk-total">${Rp(b.total)}</span></div>
+          ${fnbArr.length ? `<div class="bk-field" style="grid-column:1/-1"><span class="bk-lbl">F&B</span><span class="bk-val">${fnbArr.map(f => esc(f.ico||'')+' '+esc(f.nama)+'×'+f.qty).join(', ')}</span></div>` : ''}
+          ${b.reject_reason ? `<div class="bk-field" style="grid-column:1/-1"><span class="bk-lbl">Alasan Ditolak</span><span class="bk-val" style="color:var(--red)">${esc(b.reject_reason)}</span></div>` : ''}
+        </div>
+        <div class="bk-actions" data-id="${esc(b.id)}" data-status="${esc(b.payment_status)}">
+          ${b.payment_status === 'pending' ? `
+            <a href="payment-waiting.html?id=${encodeURIComponent(b.id)}" class="btn btn-warning btn-sm">⏳ Lihat Status Pembayaran</a>
+            <button class="btn btn-primary btn-sm btn-wa-send">💬 Kirim Bukti WA</button>
+          ` : ''}
+          ${b.payment_status === 'paid' ? `
+            <button class="btn btn-ghost btn-sm btn-show-struk">🖨️ Lihat Struk</button>
+          ` : ''}
+          ${['expired','rejected','cancelled'].includes(b.payment_status) ? `
+            <a href="booking.html" class="btn btn-ghost btn-sm">📅 Booking Baru</a>
+          ` : ''}
+        </div>`;
+
+      // WA button
+      const waBtn = card.querySelector('.btn-wa-send');
+      if (waBtn) waBtn.addEventListener('click', () => window.open(waLink(b), '_blank'));
+
+      // Struk button
+      const strBtn = card.querySelector('.btn-show-struk');
+      if (strBtn) {
+        strBtn.addEventListener('click', async () => {
+          strBtn.disabled = true; strBtn.textContent = '⏳...';
+          const struk = await getStruk(b.id);
+          strBtn.disabled = false; strBtn.textContent = '🖨️ Lihat Struk';
+          if (!struk) { toast('Struk belum tersedia', 'warning'); return; }
+          const w = window.open('', '_blank', 'width=420,height=640');
+          w.document.write(`<html><head><title>Struk ${esc(b.id)}</title><style>body{font-family:monospace;font-size:13px;padding:20px;line-height:1.8;white-space:pre-wrap;background:#fff;color:#111}</style></head><body>${esc(struk)}<br><br><button onclick="window.print()" style="margin-top:1rem;padding:.5rem 1.2rem;cursor:pointer;font-size:14px">🖨️ Cetak</button></body></html>`);
+          w.document.close();
+        });
+      }
+
+      container.appendChild(card);
+    });
+
+    area.appendChild(container);
+
+    // Info
+    const info = document.createElement('div');
+    info.style.cssText = 'text-align:center;margin-top:1rem;font-size:.78rem;color:var(--text3)';
+    info.textContent = `Ditemukan ${bookings.length} booking`;
+    area.appendChild(info);
+
+  } catch(err) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-ico">⚠️</div><div>${esc(err.message||'Terjadi kesalahan')}</div></div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Cek Booking';
+  }
+}
+
+// Auto-cek jika ada query param
+(function(){
+  const params = new URLSearchParams(location.search);
+  const n = params.get('nama');
+  const w = params.get('wa');
+  if (n && w) {
+    document.getElementById('s-nama').value = n;
+    document.getElementById('s-wa').value   = w;
+    cekBooking();
+  }
+})();
+</script>
+</body>
+</html>

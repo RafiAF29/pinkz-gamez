@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Pembayaran — Pinkz Gamez Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+</head>
+<body>
+<div id="sb-ov" class="sb-overlay"></div>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Admin</div></div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-footer"><a href="login.html" onclick="doLogout()">↩ Log Out</a></div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title"><h1>Validasi Pembayaran</h1><p>ACC atau tolak pembayaran pelanggan</p></div>
+      <div class="tb-right">
+        <div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge" id="tb-role-badge">Staff</span><div class="tb-avatar" id="tb-avatar">?</div></div>
+        <button class="mob-btn" id="mob-btn"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      </div>
+    </div>
+    <div class="page">
+      <div class="stats" style="margin-bottom:1.4rem">
+        <div class="stat"><div class="stat-icon">⏳</div><div class="stat-label">Menunggu</div><div class="stat-value" id="cp">0</div></div>
+        <div class="stat"><div class="stat-icon">✅</div><div class="stat-label">ACC Hari Ini</div><div class="stat-value" id="ca">0</div></div>
+        <div class="stat"><div class="stat-icon">❌</div><div class="stat-label">Ditolak</div><div class="stat-value" id="cr">0</div></div>
+        <div class="stat"><div class="stat-icon">💰</div><div class="stat-label">Pendapatan Hari Ini</div><div class="stat-value" id="ct">Rp 0</div></div>
+      </div>
+      <div class="action-bar">
+        <div class="filter-tabs" id="filter-tabs">
+          <button class="ftab on" data-f="all">Semua</button>
+          <button class="ftab" data-f="pending">⏳ Pending</button>
+          <button class="ftab" data-f="paid">✅ Paid</button>
+          <button class="ftab" data-f="rejected">❌ Rejected</button>
+          <button class="ftab" data-f="expired">🕐 Expired</button>
+        </div>
+        <div class="search-bar">
+          <span class="s-ico"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg></span>
+          <input type="text" placeholder="Cari nama / ID..." id="q"/>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>ID Booking</th><th>Tipe</th><th>Pelanggan</th><th>Unit</th><th>Waktu</th><th>F&B</th><th>Total</th><th>Status</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Reject -->
+<div class="modal-bg" id="m-rj">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-x" id="btn-close-rj">✕</button>
+    <div class="modal-title" style="color:var(--red)">❌ Tolak Pembayaran</div>
+    <input type="hidden" id="rj-id"/>
+    <div class="fg">
+      <label>Alasan Penolakan</label>
+      <select id="rj-sel">
+        <option>Nominal tidak sesuai</option>
+        <option>Screenshot tidak jelas</option>
+        <option>Bukti tidak valid</option>
+        <option>Pembayaran ganda</option>
+        <option>Lainnya</option>
+      </select>
+    </div>
+    <div class="fg" id="rj-oth" style="display:none">
+      <label>Alasan lainnya</label>
+      <input id="rj-txt" placeholder="Tulis alasan..."/>
+    </div>
+    <div style="display:flex;gap:.7rem">
+      <button class="btn btn-ghost" style="flex:1" id="btn-cancel-rj">Batal</button>
+      <button class="btn btn-danger" style="flex:1" id="btn-do-rj">❌ Tolak</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Struk -->
+<div class="modal-bg" id="m-struk">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-x" id="btn-close-struk">✕</button>
+    <div class="modal-title">🖨️ Struk Pembayaran</div>
+    <pre id="struk-c" style="background:#fff;color:#111;padding:1rem;border-radius:var(--r);font-family:monospace;font-size:.72rem;line-height:1.8;white-space:pre-wrap;overflow-x:auto"></pre>
+    <div style="display:flex;gap:.6rem;margin-top:.8rem">
+      <button class="btn btn-ghost" style="flex:1" onclick="window.print()">🖨️ Cetak</button>
+      <button class="btn btn-primary" style="flex:1" id="btn-close-struk2">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+  const s = await requireAdminAsync(); if (!s) return;
+  fillAdminUser(s); buildSidebar(s.role, 'pembayaran.html'); initMobSidebar();
+
+  let filt = 'all';
+  let allBookings = [];
+
+  // Event listeners
+  document.getElementById('filter-tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.ftab'); if (!btn) return;
+    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+    btn.classList.add('on'); filt = btn.dataset.f; renderTable();
+  });
+  document.getElementById('q').addEventListener('input', renderTable);
+  document.getElementById('btn-close-rj').onclick    = () => closeM('m-rj');
+  document.getElementById('btn-cancel-rj').onclick   = () => closeM('m-rj');
+  document.getElementById('btn-close-struk').onclick  = () => closeM('m-struk');
+  document.getElementById('btn-close-struk2').onclick = () => closeM('m-struk');
+  document.getElementById('rj-sel').addEventListener('change', function(){
+    document.getElementById('rj-oth').style.display = this.value === 'Lainnya' ? 'block' : 'none';
+  });
+  document.getElementById('btn-do-rj').onclick = doRj;
+
+  // Tabel event delegation
+  document.getElementById('tbody').addEventListener('click', async e => {
+    const accBtn = e.target.closest('[data-acc]');
+    const rjBtn  = e.target.closest('[data-rj]');
+    const prtBtn = e.target.closest('[data-prt]');
+    const detBtn = e.target.closest('[data-det]');
+
+    if (accBtn) {
+      const id = accBtn.dataset.acc;
+      if (!confirm(`ACC pembayaran ${id}?`)) return;
+      accBtn.disabled = true; accBtn.textContent = '⏳...';
+      const ok = adminAccPayment(id);
+      if (ok) { toast('✅ Pembayaran di-ACC!', 'success'); await render(); }
+      else { toast('❌ Gagal ACC', 'error'); accBtn.disabled = false; accBtn.textContent = '✓ ACC'; }
+    }
+
+    if (rjBtn) {
+      document.getElementById('rj-id').value = rjBtn.dataset.rj;
+      document.getElementById('rj-txt').value = '';
+      document.getElementById('rj-oth').style.display = 'none';
+      document.getElementById('rj-sel').selectedIndex = 0;
+      openM('m-rj');
+    }
+
+    if (prtBtn) {
+      const id = prtBtn.dataset.prt;
+      // Fetch struk dari server langsung
+      const struk = await getStruk(id);
+      if (!struk) { toast('Struk belum tersedia', 'warning'); return; }
+      document.getElementById('struk-c').textContent = struk;
+      openM('m-struk');
+    }
+  });
+
+  function doRj() {
+    const id     = document.getElementById('rj-id').value;
+    const sel    = document.getElementById('rj-sel').value;
+    const alasan = sel === 'Lainnya' ? (document.getElementById('rj-txt').value.trim() || 'Ditolak') : sel;
+    const btn    = document.getElementById('btn-do-rj');
+    btn.disabled = true; btn.textContent = '⏳...';
+    const ok = adminRejectPayment(id, alasan);
+    btn.disabled = false; btn.textContent = '❌ Tolak';
+    if (ok) { closeM('m-rj'); toast('Pembayaran ditolak', 'info'); render(); }
+    else toast('Gagal menolak', 'error');
+  }
+
+  function renderTable() {
+    const q = document.getElementById('q').value.toLowerCase();
+    const filtered = allBookings.filter(b =>
+      (filt === 'all' || b.payment_status === filt) &&
+      (!q || (b.nama||'').toLowerCase().includes(q) || (b.id||'').toLowerCase().includes(q) || (b.unit_nama||b.unitNama||'').toLowerCase().includes(q))
+    );
+
+    const td = today();
+    setText('cp', allBookings.filter(b => b.payment_status === 'pending').length);
+    setText('ca', allBookings.filter(b => b.payment_status === 'paid' && String(b.paid_at||'').startsWith(td)).length);
+    setText('cr', allBookings.filter(b => b.payment_status === 'rejected').length);
+    setText('ct', Rp(allBookings.filter(b => b.payment_status === 'paid' && String(b.paid_at||'').startsWith(td)).reduce((s,b) => s+(b.total||0), 0)));
+
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    if (!filtered.length) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:2.5rem;color:var(--text3)">Tidak ada data</td></tr>`;
+      return;
+    }
+
+    filtered.forEach(b => {
+      const unitNama  = b.unitNama  || b.unit_nama  || '—';
+      const tglStr    = b.tglStr    || b.tgl_str    || b.tgl || '';
+      const timeRange = b.timeRange || b.time_range || '—';
+      const fnbArr    = b.fnb || [];
+      const fnbStr    = fnbArr.length ? fnbArr.map(f => `${esc(f.ico||'')} ${esc(f.nama)}×${f.qty}`).join(', ') : '—';
+      const tipeBadge = b.tipe_booking === 'online'
+        ? '<span class="badge badge-purple" style="font-size:.58rem">🌐 Online</span>'
+        : '<span class="badge badge-blue" style="font-size:.58rem">🚶 Walk-in</span>';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-size:.74rem"><b>${esc(b.id)}</b></td>
+        <td>${tipeBadge}</td>
+        <td><div style="font-weight:600;font-size:.83rem">${esc(b.nama||'')}</div><div style="font-size:.7rem;color:var(--text3)">${esc(b.wa||'')}</div></td>
+        <td style="font-size:.8rem">${esc(unitNama)}</td>
+        <td style="font-size:.74rem">${esc(tglStr)}<br>${esc(timeRange)} (${b.dur||0}j)</td>
+        <td style="font-size:.72rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(fnbStr)}">${fnbStr}</td>
+        <td><b style="font-size:.85rem">${Rp(b.total||0)}</b></td>
+        <td>${statusBadge(b.payment_status)}</td>
+        <td>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            ${b.payment_status === 'pending' ? `
+              <button class="btn btn-success btn-sm" data-acc="${esc(b.id)}">✓ ACC</button>
+              <button class="btn btn-danger btn-sm" data-rj="${esc(b.id)}">✕</button>
+            ` : ''}
+            ${b.payment_status === 'paid' ? `
+              <button class="btn btn-ghost btn-sm" data-prt="${esc(b.id)}">🖨 Struk</button>
+            ` : ''}
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function render() {
+    // Fetch langsung dari API — bukan localStorage
+    allBookings = await fetchBookings();
+    renderTable();
+  }
+
+  setInterval(render, 8000);
+  render();
+})();
+</script>
+</body>
+</html>

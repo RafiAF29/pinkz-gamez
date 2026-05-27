@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Booking — Pinkz Gamez</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .bk-layout{display:grid;grid-template-columns:1fr 310px;gap:1.5rem;align-items:start}
+    .form-sec{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.35rem;margin-bottom:1rem}
+    .step-hdr{display:flex;align-items:center;gap:.8rem;font-size:.88rem;font-weight:700;margin-bottom:1rem}
+    .step-n{width:28px;height:28px;border-radius:50%;background:var(--pink-d);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+    .cat-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem}
+    .cat-tab{padding:.42rem 1rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;font-family:var(--ui);transition:all .18s}
+    .cat-tab.on{background:rgba(236,72,153,.14);border-color:var(--pink);color:var(--pink-l)}
+    .unit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem}
+    .unit-pill{background:var(--card2);border:2px solid var(--border);border-radius:var(--r);padding:.8rem .6rem;cursor:pointer;transition:all .2s;text-align:center;position:relative}
+    .unit-pill:hover:not(.maint){border-color:rgba(236,72,153,.5)}
+    .unit-pill.on{border-color:var(--pink);background:rgba(236,72,153,.1)}
+    .unit-pill.maint{opacity:.45;cursor:not-allowed;background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.2)}
+    .up-ico{font-size:1.5rem;display:block;margin-bottom:4px}
+    .up-name{font-size:.74rem;font-weight:700;margin-bottom:2px}
+    .up-price{font-size:.65rem;color:var(--pink-l)}
+    .up-maint{position:absolute;top:.3rem;right:.3rem;font-size:.55rem;background:rgba(239,68,68,.2);color:#f87171;border-radius:4px;padding:1px 4px;font-weight:700}
+    .weekend-banner{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--r);padding:.7rem 1rem;margin-bottom:.8rem;display:flex;align-items:center;gap:.7rem;font-size:.8rem}
+    .date-row{display:flex;gap:.8rem;align-items:center}
+    .date-nav{width:32px;height:32px;border-radius:8px;background:var(--card2);border:1px solid var(--border);color:var(--text);cursor:pointer;font-size:1.1rem;display:grid;place-items:center;transition:all .2s}
+    .date-nav:hover{border-color:var(--pink);color:var(--pink-l)}
+    .slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+    .slot-btn{padding:.5rem .2rem;border-radius:7px;font-size:.64rem;font-weight:600;text-align:center;cursor:pointer;transition:all .18s;border:1px solid var(--border);background:var(--card2);color:var(--text2);font-family:var(--ui)}
+    .slot-btn.on{background:var(--pink-d);border-color:var(--pink-d);color:#fff}
+    .slot-btn.booked{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2);color:rgba(239,68,68,.4);cursor:not-allowed}
+    .slot-btn.pend{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.2);color:rgba(245,158,11,.55);cursor:not-allowed}
+    .slot-legend{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:.7rem}
+    .leg-item{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--text2)}
+    .leg-dot{width:10px;height:10px;border-radius:2px}
+    .fnb-tabs{display:flex;gap:.4rem;margin-bottom:.8rem;flex-wrap:wrap}
+    .fnb-tab{padding:.35rem .85rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;font-family:var(--ui);transition:all .18s}
+    .fnb-tab.on{background:rgba(236,72,153,.12);border-color:var(--pink);color:var(--pink-l)}
+    .fnb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.6rem}
+    .fnb-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:.8rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+    .fn-name{font-size:.8rem;font-weight:700}.fn-price{font-size:.7rem;color:var(--pink-l);margin-top:2px}
+    .qty-ctrl{display:flex;align-items:center;gap:.4rem}
+    .qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:1rem;display:grid;place-items:center;transition:all .18s;flex-shrink:0}
+    .qty-btn:hover{border-color:var(--pink);color:var(--pink-l)}.qty-num{font-size:.84rem;font-weight:700;min-width:18px;text-align:center}
+    .sum-box{background:var(--card2);border:1px solid var(--border);border-radius:var(--r2);padding:1.3rem;position:sticky;top:80px}
+    .sum-box h3{font-size:.86rem;font-weight:700;margin-bottom:1rem}
+    .sum-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
+    .sum-lbl{color:var(--text2)}.sum-val{font-weight:600;max-width:165px;text-align:right;font-size:.8rem}
+    .sum-total-row{display:flex;justify-content:space-between;padding:10px 0 0;margin-top:6px;border-top:2px solid rgba(236,72,153,.28)}
+    .sum-total-lbl{font-weight:700}.sum-total-val{font-family:var(--pixel);font-size:.76rem;color:var(--pink-l)}
+    .bonus-row{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:var(--r);padding:.5rem .7rem;font-size:.74rem;color:var(--orange);font-weight:700;margin:6px 0;display:flex;align-items:center;gap:.5rem}
+    .sbox{display:none;text-align:center;padding:3rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r2)}
+    @media(max-width:860px){.bk-layout{grid-template-columns:1fr}.slot-grid{grid-template-columns:repeat(3,1fr)}.unit-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+    @media(max-width:480px){.slot-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<nav class="pub-nav">
+  <a href="index.html" class="pub-brand">
+    <div class="pub-brand-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg></div>
+    <span class="pub-brand-name">Pinkz Gamez</span>
+  </a>
+  <ul class="pub-links">
+    <li><a href="index.html">Beranda</a></li>
+    <li><a href="booking.html" class="cur">Booking</a></li>
+    <li id="nav-right"></li>
+  </ul>
+</nav>
+
+<div class="pub-form-wrap">
+  <div class="pub-form-title">Booking Online</div>
+  <p class="pub-form-sub">Pilih unit, tanggal, sesi, dan pesanan. Total otomatis dihitung.</p>
+
+  <div class="sbox" id="sbox">
+    <div style="font-size:3.5rem;margin-bottom:1rem">📋</div>
+    <h2 style="font-family:var(--pixel);font-size:.8rem;color:var(--pink-l);margin-bottom:.8rem">Booking Terkirim!</h2>
+    <p style="color:var(--text2);font-size:.86rem;margin-bottom:.5rem" id="sbox-msg"></p>
+    <p style="color:var(--text3);font-size:.76rem;margin-bottom:1.5rem">Lanjutkan ke pembayaran QRIS, lalu tunggu verifikasi admin.</p>
+    <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap">
+      <a href="my-bookings.html" class="btn btn-ghost">Cek Status</a>
+      <a href="payment.html" class="btn btn-primary">Bayar Sekarang →</a>
+    </div>
+  </div>
+
+  <div id="bkf">
+    <div class="bk-layout">
+      <div>
+        <!-- STEP 1: UNIT -->
+        <div class="form-sec">
+          <div class="step-hdr"><div class="step-n">1</div><span>Pilih Unit</span></div>
+          <div class="cat-tabs" id="cat-tabs">
+            <button class="cat-tab on" onclick="setCat('SEMUA',this)">🎮 Semua</button>
+            <button class="cat-tab" onclick="setCat('PS4',this)">🎮 Reguler B</button>
+            <button class="cat-tab" onclick="setCat('PS5',this)">👑 VIP Room</button>
+            <button class="cat-tab" onclick="setCat('NINTENDO',this)">🎯 Nintendo</button>
+          </div>
+          <div class="unit-grid" id="unit-grid"></div>
+          <div id="unit-desc" style="display:none;margin-top:.8rem;padding:.7rem;background:rgba(236,72,153,.05);border:1px solid rgba(236,72,153,.12);border-radius:var(--r);font-size:.78rem;color:var(--text2);line-height:1.6"></div>
+        </div>
+
+        <!-- STEP 2: TANGGAL & SESI -->
+        <div class="form-sec">
+          <div class="step-hdr"><div class="step-n">2</div><span>Tanggal &amp; Sesi</span></div>
+          <div id="we-banner" style="display:none" class="weekend-banner">
+            <span style="font-size:1.2rem">🎉</span>
+            <div><strong>Weekend — Harga Spesial!</strong><br>
+            <span style="font-size:.74rem">Berlaku harga weekend. Bonus <strong>+1 jam gratis</strong> untuk TV, Reguler B &amp; VIP Room!</span></div>
+          </div>
+          <div class="date-row" style="margin-bottom:1rem">
+            <button class="date-nav" onclick="chgDate(-1)">&#8249;</button>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:.9rem" id="disp-date">—</div>
+              <div style="font-size:.74rem;color:var(--text2)" id="disp-day">—</div>
+            </div>
+            <button class="date-nav" onclick="chgDate(1)">&#8250;</button>
+            <input type="date" id="date-picker" onchange="pickDate(this.value)" style="background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.35rem .5rem;font-size:.76rem;font-family:var(--ui);cursor:pointer;width:130px"/>
+          </div>
+          <div style="font-size:.72rem;color:var(--text2);font-weight:600;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.5px">
+            Sesi &nbsp;<span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0" id="h-slot-info">—</span>
+          </div>
+          <div class="slot-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--card2);border:1px solid var(--border)"></div>Tersedia</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--pink-d)"></div>Dipilih</div>
+            <div class="leg-item"><div class="leg-dot" style="background:rgba(245,158,11,.25);border:1px solid rgba(245,158,11,.4)"></div>Pending</div>
+            <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.3)"></div>Penuh</div>
+          </div>
+          <div class="slot-grid" id="slot-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--text3);font-size:.8rem">← Pilih unit terlebih dahulu</div>
+          </div>
+          <div style="margin-top:.5rem;font-size:.7rem;color:var(--text3)">💡 Pilih sesi berurutan untuk durasi lebih dari 1 jam</div>
+        </div>
+
+        <!-- STEP 3: DATA DIRI -->
+        <div class="form-sec">
+          <div class="step-hdr"><div class="step-n">3</div><span>Data Diri</span></div>
+          <div class="row2">
+            <div class="fg"><label>Nama Lengkap</label><input type="text" id="f-nama" placeholder="Nama kamu..."/></div>
+            <div class="fg"><label>No. WhatsApp</label><input type="tel" id="f-wa" placeholder="08xxxxxxxxxx"/></div>
+          </div>
+          <div class="fg"><label>Catatan (opsional)</label><textarea id="f-cat" rows="2" placeholder="Game yang mau dimainkan, permintaan khusus..."></textarea></div>
+        </div>
+
+        <!-- STEP 4: F&B -->
+        <div class="form-sec">
+          <div class="step-hdr"><div class="step-n">4</div><span>Makanan &amp; Minuman <span style="font-size:.7rem;color:var(--text3);font-weight:400">(opsional)</span></span></div>
+          <div class="fnb-tabs">
+            <button class="fnb-tab on" onclick="sFnb('Semua',this)">Semua</button>
+            <button class="fnb-tab" onclick="sFnb('Makanan',this)">🍜 Makanan</button>
+            <button class="fnb-tab" onclick="sFnb('Minuman',this)">🥤 Minuman</button>
+            <button class="fnb-tab" onclick="sFnb('Cemilan',this)">🍪 Cemilan</button>
+          </div>
+          <div class="fnb-grid" id="fnb-grid"></div>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div>
+        <div class="sum-box">
+          <h3>📋 Ringkasan</h3>
+          <div id="sum-empty" style="text-align:center;padding:1rem;color:var(--text3);font-size:.8rem;line-height:1.7">Pilih unit &amp;<br>minimal 1 sesi</div>
+          <div id="sum-det" style="display:none">
+            <div class="sum-row"><span class="sum-lbl">Unit</span><span class="sum-val" id="sv-unit">—</span></div>
+            <div class="sum-row"><span class="sum-lbl">Tanggal</span><span class="sum-val" id="sv-tgl">—</span></div>
+            <div class="sum-row"><span class="sum-lbl">Tipe Hari</span><span class="sum-val" id="sv-hari">—</span></div>
+            <div class="sum-row"><span class="sum-lbl">Waktu</span><span class="sum-val" id="sv-time">—</span></div>
+            <div class="sum-row"><span class="sum-lbl">Bayar</span><span class="sum-val" id="sv-dur">—</span></div>
+            <div id="sv-bonus-row" class="bonus-row" style="display:none">🎉 <span id="sv-bonus-txt">+1 jam gratis!</span></div>
+            <div class="sum-row"><span class="sum-lbl">Total Jam Main</span><span class="sum-val" id="sv-jam-main">—</span></div>
+            <div class="sum-row"><span class="sum-lbl">Harga/Jam</span><span class="sum-val" id="sv-harga">—</span></div>
+            <div class="sum-row"><span class="sum-lbl">Sewa PS</span><span class="sum-val" id="sv-ps">—</span></div>
+            <div id="sv-fnb-wrap" style="display:none">
+              <div style="font-size:.7rem;color:var(--text3);padding:5px 0 2px">F&amp;B:</div>
+              <div id="sv-fnb-items"></div>
+              <div class="sum-row"><span class="sum-lbl">Total F&amp;B</span><span class="sum-val" id="sv-fnb">—</span></div>
+            </div>
+            <div class="sum-total-row"><span class="sum-total-lbl">TOTAL</span><span class="sum-total-val" id="sv-total">—</span></div>
+          </div>
+          <button class="btn btn-primary btn-full btn-pill" id="btn-bk" style="margin-top:1rem" disabled onclick="doBk()">BOOKING SEKARANG</button>
+          <div style="text-align:center;margin-top:.5rem;font-size:.68rem;color:var(--text3)">Bayar via QRIS → verifikasi admin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="js/app.js"></script>
+<script>
+  /* NAV — customer tidak perlu login */
+  buildPubNav();
+
+  const DAY_N=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const MON_N=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  let su=null, sd=today(), ss=[], fnbC={}, curCat='SEMUA', fnbCat='Semua';
+
+  /* DATE */
+  function pickDate(val){
+    if(!val||val<today()){ toast('⚠️ Tidak bisa pilih tanggal yang sudah lewat'); document.getElementById('date-picker').value=sd; return; }
+    sd=val; updDate();
+  }
+
+  function updDate(){
+    const _dp=sd.split('-'); const d=new Date(+_dp[0],+_dp[1]-1,+_dp[2]);
+    document.getElementById('disp-date').textContent=`${d.getDate()} ${MON_N[d.getMonth()]} ${d.getFullYear()}`;
+    document.getElementById('disp-day').textContent=DAY_N[d.getDay()];
+    // Sync date picker
+    const dp=document.getElementById('date-picker');
+    if(dp){ dp.min=today(); dp.value=sd; }
+    // Weekend banner
+    const we=isWeekend(sd);
+    document.getElementById('we-banner').style.display=we?'flex':'none';
+    ss=[]; renderSlots(); updSum(); renderUnits(); // re-render unit karena harga berubah
+  }
+  function chgDate(delta){
+    const parts=sd.split('-');
+    const d=new Date(+parts[0],+parts[1]-1,+parts[2]);
+    d.setDate(d.getDate()+delta);
+    const nd=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(nd<today()){ toast('⚠️ Tidak bisa pilih tanggal yang sudah lewat'); return; }
+    sd=nd; updDate();
+  }
+
+  /* UNITS */
+  function setCat(cat,el){
+    curCat=cat;
+    document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('on'));
+    el.classList.add('on'); renderUnits();
+  }
+  function renderUnits(){
+    const units=getUnits().filter(u=>curCat==='SEMUA'||u.kategori===curCat);
+    document.getElementById('unit-grid').innerHTML=units.map(u=>{
+      const meta=UNIT_META[u.kategori]||{icon:'🎮'};
+      const isMaint=u.status_unit==='maintenance';
+      const isSelected=su&&su.id===u.id;
+      const h=getHarga(u,sd);
+      return `<div class="unit-pill ${isMaint?'maint':''} ${isSelected?'on':''}" data-uid="${u.id}" onclick="${isMaint?'':'selUnit(\''+u.id+'\')'}">
+        ${isMaint?'<div class="up-maint">MAINT</div>':''}
+        <span class="up-ico">${meta.icon}</span>
+        <div class="up-name">${u.nama}</div>
+        <div class="up-price">${Rp(h)}/jam</div>
+      </div>`;
+    }).join('') || `<div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--text3);font-size:.82rem">Tidak ada unit di kategori ini</div>`;
+  }
+
+  function selUnit(uid){
+    su=getUnits().find(u=>u.id===uid); if(!su||su.status_unit==='maintenance') return;
+    renderUnits();
+    const meta=UNIT_META[su.kategori]||{desc:su.nama};
+    const h=getHarga(su,sd);
+    const we=isWeekend(sd);
+    const desc=document.getElementById('unit-desc');
+    const bonus=(we&&(su.kategori==='TV'||su.kategori==='PS4'||su.kategori==='PS5'))?'<span style="color:var(--orange);font-weight:700"> · 🎉 +1 jam gratis di weekend</span>':'';
+    desc.innerHTML=`<strong>${su.nama}</strong> — ${meta.desc}${bonus}`;
+    desc.style.display='block';
+    document.getElementById('h-slot-info').textContent=`${Rp(h)}/jam${we?' (weekend)':' (weekday)'}`;
+    ss=[]; renderSlots(); updSum();
+  }
+
+  /* SLOTS */
+  function renderSlots(){
+    const grid=document.getElementById('slot-grid');
+    if(!su){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--text3);font-size:.8rem">← Pilih unit terlebih dahulu</div>'; return; }
+    if(su.status_unit==='maintenance'){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--red);font-size:.82rem">⚠️ Unit sedang maintenance</div>'; return; }
+    grid.innerHTML=''; const frag=document.createDocumentFragment();
+    ALL_SLOTS.forEach(slot=>{
+      const bk=isSlotBooked(su.id,sd,slot), pend=isSlotPending(su.id,sd,slot), on=ss.includes(slot);
+      const btn=document.createElement('button');
+      btn.className='slot-btn'+(on?' on':bk?' booked':pend?' pend':'');
+      btn.textContent=slot;
+      if(bk){ btn.disabled=true; btn.title='Sudah penuh'; }
+      else if(pend){ btn.disabled=true; btn.title='Pending booking lain'; }
+      else{ btn.onclick=()=>tSlot(slot); }
+      frag.appendChild(btn);
+    }); grid.appendChild(frag);
+  }
+
+  function tSlot(slot){
+    if(!su||isSlotBooked(su.id,sd,slot)||isSlotPending(su.id,sd,slot)) return;
+    const idx=ss.indexOf(slot);
+    if(idx===-1){
+      if(ss.length===0){ ss.push(slot); }
+      else{
+        const ai=ALL_SLOTS.indexOf(slot), ix=ss.map(s=>ALL_SLOTS.indexOf(s)).sort((a,b)=>a-b);
+        if(ai===ix[0]-1||ai===ix[ix.length-1]+1) ss.push(slot);
+        else{ toast('⚠️ Pilih sesi yang berurutan!'); return; }
+      }
+    } else {
+      const ai=ALL_SLOTS.indexOf(slot), ix=ss.map(s=>ALL_SLOTS.indexOf(s)).sort((a,b)=>a-b);
+      if(ai===ix[0]||ai===ix[ix.length-1]) ss.splice(idx,1);
+      else{ toast('⚠️ Hapus dari ujung sesi!'); return; }
+    }
+    renderSlots(); updSum();
+  }
+
+  /* FNB */
+  function sFnb(cat,el){ fnbCat=cat; document.querySelectorAll('.fnb-tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); renderFnb(); }
+  function renderFnb(){
+    const menu=getMenu().filter(m=>m.aktif&&(fnbCat==='Semua'||m.kategori===fnbCat));
+    document.getElementById('fnb-grid').innerHTML=menu.map(m=>{
+      const q=fnbC[m.id]||0;
+      return `<div class="fnb-card">
+        <div><div class="fn-name">${m.ico||''} ${m.nama}</div><div class="fn-price">${Rp(m.harga)}</div></div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="qChg('${m.id}',-1)">−</button>
+          <div class="qty-num" id="q-${m.id}">${q}</div>
+          <button class="qty-btn" onclick="qChg('${m.id}',1)">+</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  function qChg(id,delta){
+    const item=getMenu().find(m=>m.id===id); if(!item) return;
+    const nv=Math.max(0,(fnbC[id]||0)+delta);
+    if(delta>0&&nv>item.stok){ toast('⚠️ Stok habis!'); return; }
+    if(nv===0) delete fnbC[id]; else fnbC[id]=nv;
+    const el=document.getElementById('q-'+id); if(el) el.textContent=nv;
+    updSum();
+  }
+
+  /* SUMMARY */
+  function updSum(){
+    if(!su||ss.length===0){
+      document.getElementById('sum-empty').style.display='block';
+      document.getElementById('sum-det').style.display='none';
+      document.getElementById('btn-bk').disabled=true; return;
+    }
+    const sorted=[...ss].sort((a,b)=>ALL_SLOTS.indexOf(a)-ALL_SLOTS.indexOf(b));
+    const sewa=hitungSewa(su,sd,sorted.length);
+    const tR=sorted.length===1?sorted[0]:`${sorted[0].split('–')[0]}–${sorted[sorted.length-1].split('–')[1]}`;
+    const d=new Date(sd+'T00:00:00');
+    const tglStr=`${d.getDate()} ${MON_N[d.getMonth()]} ${d.getFullYear()}`;
+    const menu=getMenu(); let tfnb=0; const fi=[];
+    Object.entries(fnbC).forEach(([id,q])=>{ const it=menu.find(m=>m.id===id); if(it&&q>0){ tfnb+=it.harga*q; fi.push({...it,qty:q}); } });
+    document.getElementById('sv-unit').textContent=su.nama;
+    document.getElementById('sv-tgl').textContent=tglStr;
+    document.getElementById('sv-hari').textContent=sewa.isWeekend?'🟡 Weekend':'🔵 Weekday';
+    document.getElementById('sv-time').textContent=tR;
+    document.getElementById('sv-dur').textContent=`${sewa.jamBayar} Jam`;
+    document.getElementById('sv-jam-main').textContent=`${sewa.jamMain} Jam`;
+    document.getElementById('sv-harga').textContent=Rp(sewa.harga)+'/jam';
+    document.getElementById('sv-ps').textContent=Rp(sewa.total);
+    document.getElementById('sv-total').textContent=Rp(sewa.total+tfnb);
+    document.getElementById('sum-empty').style.display='none';
+    document.getElementById('sum-det').style.display='block';
+    // Bonus row
+    if(sewa.bonusJam>0){
+      document.getElementById('sv-bonus-row').style.display='flex';
+      document.getElementById('sv-bonus-txt').textContent=`+${sewa.bonusJam} jam gratis! (total main ${sewa.jamMain} jam)`;
+    } else { document.getElementById('sv-bonus-row').style.display='none'; }
+    if(fi.length>0){
+      document.getElementById('sv-fnb-wrap').style.display='block';
+      document.getElementById('sv-fnb').textContent=Rp(tfnb);
+      document.getElementById('sv-fnb-items').innerHTML=fi.map(f=>`<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:2px 0;color:var(--text2)"><span>${f.ico||''} ${f.nama} x${f.qty}</span><span>${Rp(f.harga*f.qty)}</span></div>`).join('');
+    } else { document.getElementById('sv-fnb-wrap').style.display='none'; }
+    document.getElementById('btn-bk').disabled=false;
+  }
+
+  /* SUBMIT */
+  function doBk(){
+    const nama=document.getElementById('f-nama').value.trim();
+    const wa=document.getElementById('f-wa').value.trim();
+    if(!nama){ toast('❌ Isi nama!'); return; }
+    if(!wa){ toast('❌ Isi WhatsApp!'); return; }
+    if(!su){ toast('❌ Pilih unit!'); return; }
+    if(ss.length===0){ toast('❌ Pilih sesi!'); return; }
+    if(!isValidBookingDate(sd)){ toast('❌ Tanggal tidak valid!'); return; }
+    const sorted=[...ss].sort((a,b)=>ALL_SLOTS.indexOf(a)-ALL_SLOTS.indexOf(b));
+    const sewa=hitungSewa(su,sd,sorted.length);
+    const tR=sorted.length===1?sorted[0]:`${sorted[0].split('–')[0]}–${sorted[sorted.length-1].split('–')[1]}`;
+    const d=new Date(sd+'T00:00:00');
+    const tglStr=`${d.getDate()} ${MON_N[d.getMonth()]} ${d.getFullYear()}`;
+    const menu=getMenu(); let tfnb=0; const fi=[];
+    Object.entries(fnbC).forEach(([id,q])=>{ const it=menu.find(m=>m.id===id); if(it&&q>0){ tfnb+=it.harga*q; fi.push({id:it.id,nama:it.nama,ico:it.ico||'',harga:it.harga,qty:q}); } });
+    const bk={
+      id:'BK-'+Date.now(),
+      unitId:su.id, unitNama:su.nama, kategori:su.kategori,
+      tgl:sd, tglStr, slots:sorted, timeRange:tR,
+      dur:sewa.jamBayar, jamMain:sewa.jamMain, bonusJam:sewa.bonusJam, isWeekend:sewa.isWeekend,
+      nama, wa, catatan:document.getElementById('f-cat').value.trim(),
+      fnb:fi, total_ps:sewa.total, total_fnb:tfnb, total:sewa.total+tfnb,
+      payment_status:'pending', booking_status:'pending',
+      tipe_booking:'online', created_at:new Date().toISOString(),
+      expires_at:new Date(Date.now()+15*60*1000).toISOString(),
+    };
+    // Simpan booking via API langsung
+    const saved = addBookingToStore(bk);
+    if(!saved) return;
+    // Redirect ke payment-waiting dengan booking ID dari server
+    sessionStorage.setItem('last_booking_id', bk.id);
+    location.href = 'payment-waiting.html?id=' + encodeURIComponent(bk.id);
+  }
+
+  renderUnits(); renderFnb(); updDate();
+</script>
+</body>
+</html>

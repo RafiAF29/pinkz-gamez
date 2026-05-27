@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard — Pinkz Gamez Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <style>
+    .unit-bar-item{display:flex;align-items:center;gap:.7rem;padding:.3rem 0}
+    .ui-info{flex:1;min-width:0}
+    .ui-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ui-track{height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:3px}
+    .ui-fill{height:5px;border-radius:3px;transition:width .4s}
+    .pending-item{display:flex;align-items:center;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);gap:.5rem}
+    .pending-item:last-child{border-bottom:none}
+  </style>
+</head>
+<body>
+<div id="sb-ov" class="sb-overlay"></div>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Admin</div></div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-footer"><a href="login.html" onclick="doLogout()">↩ Log Out</a></div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title"><h1>Overview</h1><p>Dashboard Pinkz Gamez PS Rental</p></div>
+      <div class="tb-right">
+        <div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge" id="tb-role-badge">Staff</span><div class="tb-avatar" id="tb-avatar">?</div></div>
+        <button class="mob-btn" id="mob-btn"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <a href="pembayaran.html" class="btn btn-primary btn-sm">💳 Validasi Bayar</a>
+      </div>
+    </div>
+    <div class="page">
+      <div class="stats">
+        <div class="stat"><div class="stat-icon">⏳</div><div class="stat-label">Perlu Verifikasi</div><div class="stat-value" id="s-pend">—</div></div>
+        <div class="stat"><div class="stat-icon">✅</div><div class="stat-label">Dikonfirmasi Hari Ini</div><div class="stat-value" id="s-conf">—</div></div>
+        <div class="stat"><div class="stat-icon">💰</div><div class="stat-label">Pendapatan Hari Ini</div><div class="stat-value" id="s-rev">—</div></div>
+        <div class="stat"><div class="stat-icon">🔧</div><div class="stat-label">Unit Maintenance</div><div class="stat-value" id="s-mnt" style="color:var(--red)">—</div></div>
+      </div>
+
+      <div id="alert-pend" class="alert-box alert-warn" style="display:none;margin-top:1rem">
+        <div><strong style="color:var(--orange)">⚠️ Ada pembayaran menunggu verifikasi!</strong><br><span style="font-size:.82rem;color:var(--text2)" id="alert-txt"></span></div>
+        <a href="pembayaran.html" class="btn btn-warning btn-sm">Verifikasi Sekarang</a>
+      </div>
+      <div id="alert-maint" class="alert-box alert-err" style="display:none;margin-top:.5rem">
+        <div><strong style="color:var(--red)">🔧 Ada unit dalam Maintenance!</strong><br><span style="font-size:.82rem;color:var(--text2)" id="alert-maint-txt"></span></div>
+        <a href="units.html" class="btn btn-danger btn-sm">Kelola Unit</a>
+      </div>
+
+      <div class="ov-grid" style="margin-top:1.2rem">
+        <div class="ov-card">
+          <div class="ov-card-title">📋 Booking Terbaru</div>
+          <div id="bk-list"><div style="color:var(--text3);font-size:.82rem">Memuat...</div></div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-card-title">⏳ Menunggu Persetujuan</div>
+          <div id="pend-list"><div style="color:var(--text3);font-size:.82rem">Memuat...</div></div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-card-title">🎮 Status Unit — Hari Ini</div>
+          <div id="unit-status"><div style="color:var(--text3);font-size:.82rem">Memuat...</div></div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-card-title">💳 Pembayaran Terbaru</div>
+          <div id="pay-list"><div style="color:var(--text3);font-size:.82rem">Memuat...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/app.js"></script>
+<script>
+(async () => {
+  const s = await requireAdminAsync(); if (!s) return;
+  fillAdminUser(s); buildSidebar(s.role, 'dashboard.html'); initMobSidebar();
+
+  async function render() {
+    // Fetch semua dari API langsung
+    const [bookings, units] = await Promise.all([
+      fetchBookings(),
+      fetchUnits(),
+    ]);
+
+    const td      = today();
+    const pend    = bookings.filter(b => b.payment_status === 'pending');
+    const confTd  = bookings.filter(b => b.payment_status === 'paid' && String(b.paid_at||'').startsWith(td));
+    const revTd   = confTd.reduce((s,b) => s+(b.total||0), 0);
+    const maintUs = units.filter(u => u.status_unit === 'maintenance');
+
+    setText('s-pend', pend.length);
+    setText('s-conf', confTd.length);
+    setText('s-rev',  Rp(revTd));
+    setText('s-mnt',  maintUs.length);
+
+    // Alerts
+    const ap = document.getElementById('alert-pend');
+    if (pend.length > 0) {
+      ap.style.display = 'flex';
+      setText('alert-txt', `${pend.length} pembayaran menunggu di-ACC.`);
+    } else ap.style.display = 'none';
+
+    const am = document.getElementById('alert-maint');
+    if (maintUs.length > 0) {
+      am.style.display = 'flex';
+      setText('alert-maint-txt', maintUs.map(u => u.nama).join(', ') + ' sedang maintenance.');
+    } else am.style.display = 'none';
+
+    // Booking terbaru
+    const bkEl = document.getElementById('bk-list');
+    if (!bookings.length) { bkEl.innerHTML = '<div style="color:var(--text3);font-size:.82rem">Belum ada booking</div>'; }
+    else {
+      bkEl.innerHTML = '';
+      bookings.slice(0,5).forEach(b => {
+        const unitNama  = b.unitNama  || b.unit_nama  || '—';
+        const timeRange = b.timeRange || b.time_range || '—';
+        const tglStr    = b.tglStr    || b.tgl_str    || b.tgl || '';
+        const div = document.createElement('div'); div.className='bk-item';
+        div.innerHTML=`<div class="bk-item-l"><div class="bi-user">👤 ${esc(b.nama)}</div><div class="bi-det">${esc(unitNama)} · ${esc(timeRange)} · ${esc(tglStr)}</div></div>${statusBadge(b.payment_status)}`;
+        bkEl.appendChild(div);
+      });
+    }
+
+    // Pending list
+    const plEl = document.getElementById('pend-list');
+    if (!pend.length) { plEl.innerHTML = '<div style="color:var(--text3);font-size:.82rem;padding:.5rem 0">Tidak ada yang pending</div>'; }
+    else {
+      plEl.innerHTML = '';
+      pend.slice(0,4).forEach(b => {
+        const unitNama  = b.unitNama  || b.unit_nama  || '—';
+        const timeRange = b.timeRange || b.time_range || '—';
+        const div = document.createElement('div'); div.className='pending-item';
+        div.innerHTML=`<div><div style="font-size:.82rem;font-weight:600">${esc(b.nama)}</div><div style="font-size:.72rem;color:var(--text2)">${esc(unitNama)} · ${esc(timeRange)}</div></div><div style="display:flex;gap:.4rem"><span style="font-size:.8rem;font-weight:700;color:var(--pink-l)">${Rp(b.total)}</span><a href="pembayaran.html" class="btn btn-warning btn-sm" style="padding:.25rem .6rem;font-size:.68rem">ACC</a></div>`;
+        plEl.appendChild(div);
+      });
+    }
+
+    // Paid list
+    const pyEl = document.getElementById('pay-list');
+    const paid = bookings.filter(b => b.payment_status === 'paid').slice(0,5);
+    if (!paid.length) { pyEl.innerHTML = '<div style="color:var(--text3);font-size:.82rem;padding:.5rem 0">Belum ada pembayaran</div>'; }
+    else {
+      pyEl.innerHTML = '';
+      paid.forEach(b => {
+        const unitNama = b.unitNama || b.unit_nama || '—';
+        const tglStr   = b.tglStr   || b.tgl_str   || b.tgl || '';
+        const div = document.createElement('div'); div.className='bk-item';
+        div.innerHTML=`<div class="bk-item-l"><div class="bi-user">💳 ${esc(b.nama)}</div><div class="bi-det">${esc(unitNama)} · ${esc(tglStr)}</div></div><span style="font-size:.82rem;font-weight:700;color:var(--green)">${Rp(b.total)}</span>`;
+        pyEl.appendChild(div);
+      });
+    }
+
+    // Unit status
+    const uEl = document.getElementById('unit-status');
+    uEl.innerHTML = '';
+    const bkSlots  = getBookedSlots();
+    const pkSlots  = getPendingSlots();
+    units.forEach(u => {
+      const bCnt = (bkSlots[u.id]?.[td]||[]).length;
+      const pCnt = (pkSlots[u.id]?.[td]||[]).length;
+      const used = new Set([...(bkSlots[u.id]?.[td]||[]),...(pkSlots[u.id]?.[td]||[])]).size;
+      const pct  = Math.round((used/16)*100);
+      const meta = UNIT_META[u.kategori]||{icon:'🎮'};
+      const isMaint = u.status_unit === 'maintenance';
+      const clr = isMaint ? 'var(--red)' : pct>70 ? 'var(--orange)' : 'var(--green)';
+      const item = document.createElement('div'); item.className='unit-bar-item';
+      item.innerHTML=`<span style="font-size:1rem">${meta.icon}</span><div class="ui-info"><div class="ui-name">${esc(u.nama)}</div><div class="ui-track"><div class="ui-fill" style="width:${isMaint?100:pct}%;background:${clr}"></div></div></div><span style="font-size:.7rem;color:${clr}">${isMaint?'🔧 Maint':used+'/16'}</span>`;
+      uEl.appendChild(item);
+    });
+  }
+
+  setInterval(render, 8000);
+  render();
+})();
+</script>
+</body>
+</html>

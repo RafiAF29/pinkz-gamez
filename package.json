@@ -1,0 +1,19 @@
+{
+  "name": "pinkz-gamez-rental",
+  "version": "8.2.0",
+  "private": true,
+  "description": "Pinkz Gamez PS Rental \u2014 Full Backend Mode",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "check": "node --check server.js && node --check backend/services/db.js",
+    "migrate": "node backend/schema/migrate_json_to_mysql.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "mysql2": "^3.0.0"
+  }
+}

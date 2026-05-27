@@ -1,0 +1,17 @@
+# Environment
+.env
+
+# Data (tidak di-commit di production)
+data/db.json
+data/*.tmp
+
+# Logs
+logs/
+*.log
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Pembayaran Berhasil — Pinkz Gamez</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .suc-wrap{max-width:500px;margin:0 auto;padding:2rem 1.2rem;text-align:center}
+    .suc-ico{font-size:4rem;margin-bottom:.8rem;animation:pop .5s ease}
+    @keyframes pop{0%{transform:scale(0)}80%{transform:scale(1.15)}100%{transform:scale(1)}}
+    .struk-box{background:#fff;color:#111;border-radius:12px;padding:1.2rem;font-family:monospace;font-size:.72rem;line-height:2;text-align:left;white-space:pre-wrap;overflow-x:auto;margin:1.2rem 0;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+    @media print{nav,#act-btns,.suc-ico,h1,p{display:none}.struk-box{margin:0;border-radius:0;box-shadow:none;font-size:11px;padding:.5rem}}
+  </style>
+</head>
+<body>
+<nav class="pub-nav">
+  <a href="index.html" class="pub-brand"><div class="pub-brand-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg></div><span class="pub-brand-name">Pinkz Gamez</span></a>
+</nav>
+<div class="suc-wrap">
+  <div class="suc-ico">🎮</div>
+  <h1 style="font-family:var(--pixel);font-size:.86rem;color:var(--pink-l);margin-bottom:.4rem">PEMBAYARAN BERHASIL!</h1>
+  <p style="color:var(--text2);font-size:.85rem;margin-bottom:1.5rem;line-height:1.7">Slot kamu sudah dikonfirmasi. Datang tepat waktu dan nikmati gaming-mu!</p>
+  <div class="struk-box" id="struk"></div>
+  <div id="act-btns" style="display:flex;flex-direction:column;gap:.6rem">
+    <button class="btn btn-primary btn-full" onclick="window.print()">🖨️ Cetak Struk</button>
+    <button class="btn btn-ghost btn-full" id="wa-share">💬 Kirim ke WhatsApp Saya</button>
+    <a href="my-bookings.html" class="btn btn-ghost btn-full">📋 Booking Saya</a>
+    <a href="index.html" class="btn btn-ghost btn-full">🏠 Kembali ke Beranda</a>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="js/app.js"></script>
+<script>
+  syncStateFromServer();
+  const id=new URLSearchParams(location.search).get('id');
+  const bk=id?getBookingById(id):JSON.parse(localStorage.getItem('sx_last_payment')||'null');
+  if(!bk||!bk.struk){ document.getElementById('struk').textContent='Struk tidak tersedia.'; }
+  else {
+    document.getElementById('struk').textContent=bk.struk;
+    document.getElementById('wa-share').onclick=()=>{ window.open(waLink('Struk booking Pinkz Gamez PS Rental:\n\n'+bk.struk),'_blank'); };
+  }
+</script>
+</body>
+</html>

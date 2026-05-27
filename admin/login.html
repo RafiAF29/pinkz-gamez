@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin Login — Pinkz Gamez</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <style>
+    .auth-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem; }
+    .auth-card{ width:100%; max-width:420px; background:var(--card); border:1px solid var(--border); border-radius:var(--r2); padding:2.2rem; }
+    .auth-logo{ text-align:center; margin-bottom:1.8rem; }
+    .auth-logo-ico{ width:58px; height:58px; background:linear-gradient(135deg,#1e3a8a,var(--purple)); border-radius:16px; display:flex; align-items:center; justify-content:center; margin:0 auto .8rem; font-size:1.8rem; }
+    .auth-title{ font-family:var(--pixel); font-size:.72rem; color:#a78bfa; margin-bottom:.3rem; }
+    .auth-sub{ font-size:.8rem; color:var(--text3); }
+    .err-box{ background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); border-radius:var(--r); padding:.7rem 1rem; font-size:.8rem; color:var(--red); margin-bottom:1rem; display:none; }
+    .no-server-note{ background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); border-radius:var(--r); padding:.8rem 1rem; font-size:.8rem; color:var(--orange); margin-bottom:1rem; display:none; line-height:1.6; }
+  </style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-ico">🛡️</div>
+      <div class="auth-title">Pinkz Gamez — ADMIN</div>
+      <div class="auth-sub">Staff &amp; Boss Login</div>
+    </div>
+
+    <!-- Peringatan jika dibuka via file:// bukan server -->
+    <div class="no-server-note" id="no-server">
+      ⚠️ <strong>Buka via server</strong><br>
+      Jalankan <code style="font-size:.78rem;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">node server.js</code>
+      lalu buka <strong>http://localhost:3000/admin/login.html</strong>
+    </div>
+
+    <div class="err-box" id="err"></div>
+
+    <div class="fg">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="Email admin..." autocomplete="email"/>
+      <div class="field-err" id="err-email"></div>
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="pass" placeholder="••••••••" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter') doLogin()"/>
+      <div class="field-err" id="err-pass"></div>
+    </div>
+
+    <button class="btn btn-primary btn-full btn-pill" id="btn-login" onclick="doLogin()"
+            style="background:linear-gradient(135deg,#1e3a8a,var(--purple));margin-top:.4rem">
+      Masuk
+    </button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="../js/app.js"></script>
+<script>
+  // Deteksi mode file:// — tampilkan peringatan, disable tombol
+  if (!API_ENABLED) {
+    document.getElementById('no-server').style.display = 'block';
+    document.getElementById('btn-login').disabled = true;
+    document.getElementById('btn-login').textContent = 'Butuh server untuk login';
+  }
+
+  // Redirect jika sudah login dengan role yang sesuai
+  (function(){
+    const s = getSession();
+    if (s.role === 'staff') location.href = 'dashboard.html';
+    else if (s.role === 'boss') location.href = '../bos/dashboard.html';
+    // user biasa yang nyasar ke sini: tidak di-redirect, biarkan coba login
+    // dan nanti server yang tolak
+  })();
+
+  function showErr(id, msg){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'field-err' + (msg ? ' show' : '');
+  }
+
+  async function doLogin(){
+    if (!API_ENABLED) return;
+
+    const email  = document.getElementById('email').value.trim().toLowerCase();
+    const pass   = document.getElementById('pass').value;
+    const errBox = document.getElementById('err');
+    errBox.style.display = 'none';
+
+    let hasErr = false;
+    if (!email){ showErr('err-email', 'Email wajib diisi'); hasErr = true; } else showErr('err-email', '');
+    if (!pass) { showErr('err-pass',  'Password wajib diisi'); hasErr = true; } else showErr('err-pass',  '');
+    if (hasErr) return;
+
+    const btn = document.getElementById('btn-login');
+    btn.disabled = true;
+    btn.textContent = '⏳ Masuk...';
+
+    try {
+      const data = await apiAsync('POST', '/api/auth/login', { email, password: pass });
+
+      // Tolak jika bukan staff atau boss
+      if (data.user.role === 'user'){
+        errBox.textContent = 'Akun pelanggan tidak bisa login di sini.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      storeSession(data.user, data.token);
+
+      // Redirect sesuai redirect param atau role dari server
+      const redir = new URLSearchParams(location.search).get('redirect');
+      if (redir) { location.href = redir; return; }
+      location.href = data.user.role === 'boss' ? '../bos/dashboard.html' : 'dashboard.html';
+
+    } catch (err) {
+      errBox.textContent = err.message || 'Login gagal. Periksa email dan password.';
+      errBox.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+    }
+  }
+</script>
+</body>
+</html>
