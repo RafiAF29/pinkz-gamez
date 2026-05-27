@@ -37,7 +37,7 @@ module.exports = {
   DB: {
     host:    process.env.DB_HOST || 'localhost',
     port:    Number(process.env.DB_PORT) || 3306,
-    name:    process.env.DB_NAME || 'pinkz_gamez_rental',
+    name: process.env.DB_NAME || 'railway',
     user:    process.env.DB_USER || 'root',
     pass:    process.env.DB_PASS || '',
     poolMin: Number(process.env.DB_POOL_MIN) || 2,
