@@ -9,12 +9,6 @@
 --   phpMyAdmin (semua versi modern)
 -- ═══════════════════════════════════════════════════════════════
 
-CREATE DATABASE IF NOT EXISTS pinkz_gamez_rental
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE pinkz_gamez_rental;
-
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ─────────────────────────────────────────
