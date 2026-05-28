@@ -1,57 +1,244 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Menu F&B — Pinkz Gamez Admin</title><link rel="stylesheet" href="../css/main.css"/><style>.mc{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.1rem;position:relative;text-align:center;transition:border-color .2s}.mc:hover{border-color:rgba(236,72,153,.3)}.mc.inactive{opacity:.5}.mc-ico{font-size:1.8rem;display:block;margin-bottom:.5rem}.mc-name{font-weight:700;font-size:.86rem;margin-bottom:2px}.mc-cat{font-size:.66rem;color:var(--text3);margin-bottom:.4rem;text-transform:uppercase}.mc-price{font-size:.9rem;font-weight:700;color:var(--pink-l);margin-bottom:.3rem}.mc-stok{font-size:.7rem;margin-bottom:.8rem}.mc-acts{display:flex;gap:.4rem}</style></head>
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Menu F&B — Pinkz Gamez Admin</title>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <style>
+    .mc{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.1rem;position:relative;text-align:center;transition:border-color .2s}
+    .mc:hover{border-color:rgba(236,72,153,.3)}
+    .mc.inactive{opacity:.5}
+    .mc-ico{font-size:1.8rem;display:block;margin-bottom:.5rem}
+    .mc-name{font-weight:700;font-size:.86rem;margin-bottom:2px}
+    .mc-cat{font-size:.66rem;color:var(--text3);margin-bottom:.4rem;text-transform:uppercase}
+    .mc-price{font-size:.9rem;font-weight:700;color:var(--pink-l);margin-bottom:.3rem}
+    .mc-stok{font-size:.7rem;margin-bottom:.8rem}
+    .mc-acts{display:flex;gap:.4rem}
+  </style>
+</head>
 <body>
 <div id="sb-ov" class="sb-overlay"></div>
 <div class="layout">
-  <aside class="sidebar" id="sidebar"><div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Admin</div></div><nav class="sb-nav" id="sb-nav"></nav><div class="sb-footer"><a href="login.html" onclick="doLogout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> Log Out</a></div></aside>
+  <aside class="sidebar">
+    <div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Admin</div></div>
+    <nav class="sb-nav" id="sb-nav"></nav>
+    <div class="sb-footer"><a href="login.html" id="btn-logout">↩ Log Out</a></div>
+  </aside>
   <div class="main">
-    <div class="topbar"><div class="tb-title"><h1>Menu F&amp;B</h1><p>Kelola makanan, minuman, dan cemilan</p></div><div class="tb-right"><div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge" id="tb-role-badge">Staff</span><div class="tb-avatar" id="tb-avatar">?</div></div><button class="mob-btn" id="mob-btn"><svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="btn btn-primary btn-sm btn-pill" onclick="openM('m-add')">+ Tambah</button></div></div>
+    <div class="topbar">
+      <div class="tb-title"><h1>Menu F&B</h1><p>Kelola makanan, minuman, dan cemilan</p></div>
+      <div class="tb-right">
+        <div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge" id="tb-role-badge">Staff</span><div class="tb-avatar" id="tb-avatar">?</div></div>
+        <button class="mob-btn" id="mob-btn"><svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <button class="btn btn-primary btn-sm btn-pill" id="btn-add">+ Tambah</button>
+      </div>
+    </div>
     <div class="page">
-      <div class="stats" style="margin-bottom:1.4rem"><div class="stat"><div class="stat-label">Total</div><div class="stat-value" id="st-tot">0</div></div><div class="stat"><div class="stat-label">Makanan</div><div class="stat-value" id="st-mk">0</div></div><div class="stat"><div class="stat-label">Minuman</div><div class="stat-value" id="st-mn">0</div></div><div class="stat"><div class="stat-label">Cemilan</div><div class="stat-value" id="st-ce">0</div></div></div>
-      <div class="filter-tabs"><button class="ftab on" onclick="setF(this,'Semua')">Semua</button><button class="ftab" onclick="setF(this,'Makanan')">🍜 Makanan</button><button class="ftab" onclick="setF(this,'Minuman')">🥤 Minuman</button><button class="ftab" onclick="setF(this,'Cemilan')">🍪 Cemilan</button></div>
+      <div class="stats" style="margin-bottom:1.4rem">
+        <div class="stat"><div class="stat-label">Total</div><div class="stat-value" id="st-tot">0</div></div>
+        <div class="stat"><div class="stat-label">Makanan</div><div class="stat-value" id="st-mk">0</div></div>
+        <div class="stat"><div class="stat-label">Minuman</div><div class="stat-value" id="st-mn">0</div></div>
+        <div class="stat"><div class="stat-label">Cemilan</div><div class="stat-value" id="st-ce">0</div></div>
+      </div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="ftab on" data-f="Semua">Semua</button>
+        <button class="ftab" data-f="Makanan">🍜 Makanan</button>
+        <button class="ftab" data-f="Minuman">🥤 Minuman</button>
+        <button class="ftab" data-f="Cemilan">🍪 Cemilan</button>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem" id="grid"></div>
     </div>
   </div>
 </div>
-<div class="modal-bg" id="m-add"><div class="modal"><button class="modal-x" onclick="closeM('m-add')">✕</button><div class="modal-title">➕ Tambah Menu</div><div class="row2"><div class="fg"><label>Nama</label><input id="a-n" placeholder="Nama menu..."/></div><div class="fg"><label>Ikon</label><input id="a-i" placeholder="🍜" maxlength="4"/></div></div><div class="row2"><div class="fg"><label>Kategori</label><select id="a-k"><option>Makanan</option><option>Minuman</option><option>Cemilan</option></select></div><div class="fg"><label>Harga (Rp)</label><input type="number" id="a-h" placeholder="8000" min="0"/></div></div><div class="fg"><label>Stok</label><input type="number" id="a-s" placeholder="20" min="0"/></div><button class="btn btn-primary btn-full" onclick="addM()">✅ Simpan</button></div></div>
-<div class="modal-bg" id="m-edit"><div class="modal"><button class="modal-x" onclick="closeM('m-edit')">✕</button><div class="modal-title">✏️ Edit Menu</div><input type="hidden" id="e-id"/><div class="row2"><div class="fg"><label>Nama</label><input id="e-n"/></div><div class="fg"><label>Ikon</label><input id="e-i" maxlength="4"/></div></div><div class="row2"><div class="fg"><label>Kategori</label><select id="e-k"><option>Makanan</option><option>Minuman</option><option>Cemilan</option></select></div><div class="fg"><label>Harga (Rp)</label><input type="number" id="e-h" min="0"/></div></div><div class="row2"><div class="fg"><label>Stok</label><input type="number" id="e-s" min="0"/></div><div class="fg"><label>Status</label><select id="e-a"><option value="1">Aktif</option><option value="0">Nonaktif</option></select></div></div><button class="btn btn-primary btn-full" onclick="saveE()">✅ Simpan</button></div></div>
+
+<!-- Modal Tambah -->
+<div class="modal-bg" id="m-add">
+  <div class="modal">
+    <button class="modal-x" id="btn-close-add">✕</button>
+    <div class="modal-title">➕ Tambah Menu</div>
+    <div class="row2">
+      <div class="fg"><label>Nama</label><input id="a-n" placeholder="Nama menu..."/></div>
+      <div class="fg"><label>Ikon</label><input id="a-i" placeholder="🍜" maxlength="4"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Kategori</label><select id="a-k"><option>Makanan</option><option>Minuman</option><option>Cemilan</option></select></div>
+      <div class="fg"><label>Harga (Rp)</label><input type="number" id="a-h" placeholder="8000" min="0"/></div>
+    </div>
+    <div class="fg"><label>Stok</label><input type="number" id="a-s" placeholder="20" min="0"/></div>
+    <button class="btn btn-primary btn-full" id="btn-save-add">✅ Simpan</button>
+  </div>
+</div>
+
+<!-- Modal Edit -->
+<div class="modal-bg" id="m-edit">
+  <div class="modal">
+    <button class="modal-x" id="btn-close-edit">✕</button>
+    <div class="modal-title">✏️ Edit Menu</div>
+    <input type="hidden" id="e-id"/>
+    <div class="row2">
+      <div class="fg"><label>Nama</label><input id="e-n"/></div>
+      <div class="fg"><label>Ikon</label><input id="e-i" maxlength="4"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Kategori</label><select id="e-k"><option>Makanan</option><option>Minuman</option><option>Cemilan</option></select></div>
+      <div class="fg"><label>Harga (Rp)</label><input type="number" id="e-h" min="0"/></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Stok</label><input type="number" id="e-s" min="0"/></div>
+      <div class="fg"><label>Status</label><select id="e-a"><option value="1">Aktif</option><option value="0">Nonaktif</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-save-edit">✅ Simpan</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script src="../js/app.js"></script>
 <script>
+/* ── state ── */
+let curF = 'Semua';
+let _menu = [];
+
+/* ── init ── */
 (async () => {
-  const s=requireAdmin(); fillAdminUser(s); buildSidebar(s.role,'menu.html'); initMobSidebar();
-  let curF='Semua';
-  function setF(el,f){ document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); curF=f; render(); }
-  async function render(){
-    await fetchState();
-    const menu=getMenu(); const filt=curF==='Semua'?menu:menu.filter(m=>m.kategori===curF);
-    document.getElementById('st-tot').textContent=menu.length;
-    document.getElementById('st-mk').textContent=menu.filter(m=>m.kategori==='Makanan').length;
-    document.getElementById('st-mn').textContent=menu.filter(m=>m.kategori==='Minuman').length;
-    document.getElementById('st-ce').textContent=menu.filter(m=>m.kategori==='Cemilan').length;
-    document.getElementById('grid').innerHTML=filt.map(m=>`
-      <div class="mc ${m.aktif?'':'inactive'}">
-        <div style="position:absolute;top:.6rem;right:.6rem">${m.aktif?'<span class="badge badge-green" style="font-size:.58rem">Aktif</span>':'<span class="badge badge-red" style="font-size:.58rem">Nonaktif</span>'}</div>
-        <span class="mc-ico">${m.ico||'🍽️'}</span>
-        <div class="mc-name">${m.nama}</div>
-        <div class="mc-cat">${m.kategori}</div>
-        <div class="mc-price">${Rp(m.harga)}</div>
-        <div class="mc-stok" style="color:${m.stok>5?'var(--green)':'var(--orange)'}">Stok: ${m.stok}</div>
-        <div class="mc-acts">
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEdit('${m.id}')">✏️</button>
-          <button class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2)" onclick="togA('${m.id}')">${m.aktif?'🔇':'🔔'}</button>
-          <button class="btn btn-danger btn-sm" onclick="del('${m.id}')">🗑</button>
-        </div>
-      </div>`).join('');
-  }
-  function addM(){ const n=document.getElementById('a-n').value.trim(); if(!n){ toast('❌ Isi nama!'); return; } const h=parseInt(document.getElementById('a-h').value)||0; if(h<=0){ toast('❌ Isi harga!'); return; } const menu=getMenu(); menu.push({id:'mi-'+Date.now(),nama:n,ico:document.getElementById('a-i').value.trim(),kategori:document.getElementById('a-k').value,harga:h,stok:parseInt(document.getElementById('a-s').value)||0,aktif:true}); saveMenu(menu); closeM('m-add'); toast('✅ Ditambahkan!'); render(); }
-  function openEdit(id){ const m=getMenu().find(x=>x.id===id); if(!m) return; document.getElementById('e-id').value=id; document.getElementById('e-n').value=m.nama; document.getElementById('e-i').value=m.ico||''; document.getElementById('e-k').value=m.kategori; document.getElementById('e-h').value=m.harga; document.getElementById('e-s').value=m.stok; document.getElementById('e-a').value=m.aktif?'1':'0'; openM('m-edit'); }
-  function saveE(){ const id=document.getElementById('e-id').value, n=document.getElementById('e-n').value.trim(); if(!n){ toast('❌ Isi nama!'); return; } const menu=getMenu(), idx=menu.findIndex(m=>m.id===id); if(idx===-1) return; menu[idx]={...menu[idx],nama:n,ico:document.getElementById('e-i').value.trim(),kategori:document.getElementById('e-k').value,harga:parseInt(document.getElementById('e-h').value)||0,stok:parseInt(document.getElementById('e-s').value)||0,aktif:document.getElementById('e-a').value==='1'}; saveMenu(menu); closeM('m-edit'); toast('✅ Diperbarui!'); render(); }
-  function togA(id){ const menu=getMenu(), idx=menu.findIndex(m=>m.id===id); if(idx===-1) return; menu[idx].aktif=!menu[idx].aktif; saveMenu(menu); toast(menu[idx].aktif?'🔔 Aktif':'🔇 Nonaktif'); render(); }
-  function del(id){ if(!confirm('Hapus?')) return; saveMenu(getMenu().filter(m=>m.id!==id)); toast('🗑 Dihapus'); render(); }
-  render();
+  const s = await requireAdminAsync(); if (!s) return;
+  fillAdminUser(s); buildSidebar(s.role, 'menu.html'); initMobSidebar();
+  document.getElementById('btn-logout').onclick = e => { e.preventDefault(); doLogout(); };
+  await render();
 })();
+
+/* ── event listeners ── */
+document.getElementById('filter-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.ftab'); if (!btn) return;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on'); curF = btn.dataset.f; renderGrid();
+});
+
+document.getElementById('btn-add').addEventListener('click', () => {
+  document.getElementById('a-n').value = '';
+  document.getElementById('a-i').value = '';
+  document.getElementById('a-k').value = 'Makanan';
+  document.getElementById('a-h').value = '';
+  document.getElementById('a-s').value = '';
+  openM('m-add');
+});
+
+document.getElementById('btn-close-add').addEventListener('click',  () => closeM('m-add'));
+document.getElementById('btn-close-edit').addEventListener('click', () => closeM('m-edit'));
+document.getElementById('btn-save-add').addEventListener('click',   addM);
+document.getElementById('btn-save-edit').addEventListener('click',  saveE);
+
+/* event delegation untuk grid */
+document.getElementById('grid').addEventListener('click', e => {
+  const editBtn   = e.target.closest('[data-edit]');
+  const togBtn    = e.target.closest('[data-tog]');
+  const delBtn    = e.target.closest('[data-del]');
+  if (editBtn) openEdit(editBtn.dataset.edit);
+  if (togBtn)  togA(togBtn.dataset.tog);
+  if (delBtn)  del(delBtn.dataset.del);
+});
+
+/* ── functions ── */
+async function render() {
+  try {
+    const data = await apiAsync('GET', '/api/menu');
+    _menu = data.menu || [];
+    localStorage.setItem('sx_menu', JSON.stringify(_menu));
+  } catch { _menu = getMenu(); }
+  renderGrid();
+}
+
+function renderGrid() {
+  const filt = curF === 'Semua' ? _menu : _menu.filter(m => m.kategori === curF);
+  document.getElementById('st-tot').textContent = _menu.length;
+  document.getElementById('st-mk').textContent  = _menu.filter(m => m.kategori === 'Makanan').length;
+  document.getElementById('st-mn').textContent  = _menu.filter(m => m.kategori === 'Minuman').length;
+  document.getElementById('st-ce').textContent  = _menu.filter(m => m.kategori === 'Cemilan').length;
+  document.getElementById('grid').innerHTML = filt.map(m => {
+    const aktif = m.aktif === true || m.aktif === 1;
+    return `<div class="mc ${aktif?'':'inactive'}">
+      <div style="position:absolute;top:.6rem;right:.6rem">
+        ${aktif
+          ? '<span class="badge badge-green" style="font-size:.58rem">Aktif</span>'
+          : '<span class="badge badge-red" style="font-size:.58rem">Nonaktif</span>'}
+      </div>
+      <span class="mc-ico">${esc(m.ico||'🍽️')}</span>
+      <div class="mc-name">${esc(m.nama)}</div>
+      <div class="mc-cat">${esc(m.kategori)}</div>
+      <div class="mc-price">${Rp(m.harga)}</div>
+      <div class="mc-stok" style="color:${m.stok>5?'var(--green)':'var(--orange)'}">Stok: ${m.stok}</div>
+      <div class="mc-acts">
+        <button class="btn btn-ghost btn-sm" style="flex:1" data-edit="${esc(m.id)}">✏️</button>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2)" data-tog="${esc(m.id)}">${aktif?'🔇':'🔔'}</button>
+        <button class="btn btn-danger btn-sm" data-del="${esc(m.id)}">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openEdit(id) {
+  const m = _menu.find(x => x.id === id); if (!m) return;
+  document.getElementById('e-id').value = id;
+  document.getElementById('e-n').value  = m.nama;
+  document.getElementById('e-i').value  = m.ico || '';
+  document.getElementById('e-k').value  = m.kategori;
+  document.getElementById('e-h').value  = m.harga;
+  document.getElementById('e-s').value  = m.stok;
+  document.getElementById('e-a').value  = (m.aktif === true || m.aktif === 1) ? '1' : '0';
+  openM('m-edit');
+}
+
+async function addM() {
+  const nama = document.getElementById('a-n').value.trim();
+  const harga = parseInt(document.getElementById('a-h').value) || 0;
+  if (!nama)    { toast('Isi nama!', 'warning'); return; }
+  if (harga <= 0){ toast('Isi harga!', 'warning'); return; }
+  const btn = document.getElementById('btn-save-add');
+  btn.disabled = true; btn.textContent = '⏳...';
+  try {
+    await apiAsync('POST', '/api/menu', {
+      nama, ico: document.getElementById('a-i').value.trim(),
+      kategori: document.getElementById('a-k').value,
+      harga, stok: parseInt(document.getElementById('a-s').value) || 0, aktif: true
+    });
+    closeM('m-add'); toast('✅ Ditambahkan!', 'success'); await render();
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '✅ Simpan'; }
+}
+
+async function saveE() {
+  const id   = document.getElementById('e-id').value;
+  const nama = document.getElementById('e-n').value.trim();
+  if (!nama) { toast('Isi nama!', 'warning'); return; }
+  const btn = document.getElementById('btn-save-edit');
+  btn.disabled = true; btn.textContent = '⏳...';
+  try {
+    await apiAsync('PUT', '/api/menu/' + encodeURIComponent(id), {
+      nama, ico: document.getElementById('e-i').value.trim(),
+      kategori: document.getElementById('e-k').value,
+      harga: parseInt(document.getElementById('e-h').value) || 0,
+      stok:  parseInt(document.getElementById('e-s').value) || 0,
+      aktif: document.getElementById('e-a').value === '1'
+    });
+    closeM('m-edit'); toast('✅ Diperbarui!', 'success'); await render();
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '✅ Simpan'; }
+}
+
+async function togA(id) {
+  const m = _menu.find(x => x.id === id); if (!m) return;
+  try {
+    await apiAsync('POST', '/api/menu/' + encodeURIComponent(id) + '/toggle', {});
+    toast((m.aktif ? '🔇 Nonaktif' : '🔔 Aktif'), 'info'); await render();
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+}
+
+async function del(id) {
+  if (!confirm('Hapus menu ini?')) return;
+  try {
+    await apiAsync('DELETE', '/api/menu/' + encodeURIComponent(id), undefined);
+    toast('🗑 Dihapus', 'info'); await render();
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+}
 </script>
 </body>
 </html>

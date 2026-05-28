@@ -23,10 +23,10 @@
 <body>
 <div id="sb-ov" class="sb-overlay"></div>
 <div class="layout">
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
     <div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Admin</div></div>
     <nav class="sb-nav" id="sb-nav"></nav>
-    <div class="sb-footer"><a href="login.html" onclick="doLogout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> Log Out</a></div>
+    <div class="sb-footer"><a href="login.html" id="btn-logout">↩ Log Out</a></div>
   </aside>
   <div class="main">
     <div class="topbar">
@@ -38,14 +38,12 @@
         <div class="stat"><div class="stat-label">Total Unit</div><div class="stat-value" id="st-tot">0</div></div>
         <div class="stat"><div class="stat-label">Tersedia</div><div class="stat-value" id="st-av" style="color:var(--green)">0</div></div>
         <div class="stat"><div class="stat-label">Maintenance</div><div class="stat-value" id="st-mn" style="color:var(--red)">0</div></div>
-        <div class="stat"><div class="stat-label">Aktif Disewa (hari ini)</div><div class="stat-value" id="st-bk" style="color:var(--pink-l)">0</div></div>
+        <div class="stat"><div class="stat-label">Aktif Disewa</div><div class="stat-value" id="st-bk" style="color:var(--pink-l)">0</div></div>
       </div>
-      <div class="filter-tabs">
-        <button class="ftab on" onclick="setF(this,'SEMUA')">Semua</button>
-        <button class="ftab" onclick="setF(this,'REGULAR')">📺 Regular</button>
-        <button class="ftab" onclick="setF(this,'VIP')">👑 VIP</button>
-        <button class="ftab" onclick="setF(this,'VR')">🥽 VR</button>
-        <button class="ftab" onclick="setF(this,'NINTENDO')">🎯 Nintendo</button>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="ftab on" data-f="SEMUA">Semua</button>
+        <button class="ftab" data-f="PS4">🎮 PS4 (Lt.1)</button>
+        <button class="ftab" data-f="PS5">🕹️ PS5 (Lt.2)</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem" id="unit-grid"></div>
     </div>
@@ -55,105 +53,139 @@
 <!-- EDIT MODAL -->
 <div class="modal-bg" id="m-edit">
   <div class="modal" style="max-width:420px">
-    <button class="modal-x" onclick="closeM('m-edit')">✕</button>
+    <button class="modal-x" id="btn-close-edit">✕</button>
     <div class="modal-title">✏️ Edit Unit</div>
     <input type="hidden" id="e-id"/>
     <div class="fg"><label>Nama Unit</label><input id="e-nama" placeholder="Nama unit..."/></div>
-    <div style="font-size:.78rem;color:var(--text2);padding:.5rem;background:rgba(236,72,153,.05);border-radius:var(--r);margin-bottom:.8rem">💡 Harga ditentukan otomatis berdasarkan kategori unit &amp; tipe hari (weekday/weekend).</div>
     <div class="fg">
       <label>Status Unit</label>
       <select id="e-status">
-        <option value="available">✅ Available — bisa dibooking</option>
-        <option value="maintenance">🔧 Maintenance — tidak bisa dibooking sama sekali</option>
+        <option value="available">✅ Available</option>
+        <option value="maintenance">🔧 Maintenance</option>
       </select>
-      <div style="margin-top:.4rem;font-size:.74rem;color:var(--text3)">
-        💡 <strong>Available</strong> = unit sehat, slot tertentu bisa penuh karena booking.<br>
-        💡 <strong>Maintenance</strong> = unit rusak, semua slot ditutup global.
-      </div>
     </div>
-    <button class="btn btn-primary btn-full" onclick="saveEdit()">✅ Simpan Perubahan</button>
+    <button class="btn btn-primary btn-full" id="btn-save-edit">✅ Simpan Perubahan</button>
   </div>
 </div>
 
 <div id="toast"></div>
 <script src="../js/app.js"></script>
 <script>
+/* ── state ── */
+let curF = 'SEMUA';
+let _units = [];
+
+/* ── init ── */
 (async () => {
-  const s=requireAdmin(); fillAdminUser(s); buildSidebar(s.role,'units.html'); initMobSidebar();
-  const td=today();
-  let curF='SEMUA';
-  function setF(el,f){ document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); curF=f; render(); }
-
-  function getBookedCountToday(unitId){
-    const b=getBookedSlots(); const p=getPendingSlots();
-    const bSlots=(b[unitId]&&b[unitId][td])||[];
-    const pSlots=(p[unitId]&&p[unitId][td])||[];
-    return new Set([...bSlots,...pSlots]).size;
-  }
-
-  async function render(){
-    await fetchState();
-    const units=getUnits();
-    document.getElementById('st-tot').textContent=units.length;
-    document.getElementById('st-av').textContent=units.filter(u=>u.status_unit==='available').length;
-    document.getElementById('st-mn').textContent=units.filter(u=>u.status_unit==='maintenance').length;
-    const bookedToday=units.filter(u=>getBookedCountToday(u.id)>0).length;
-    document.getElementById('st-bk').textContent=bookedToday;
-
-    const filtered=curF==='SEMUA'?units:units.filter(u=>u.kategori===curF);
-    document.getElementById('unit-grid').innerHTML=filtered.map(u=>{
-      const meta=UNIT_META[u.kategori]||{icon:'🎮'};
-      const isMaint=u.status_unit==='maintenance';
-      const bookedSlots=getBookedCountToday(u.id);
-      const pct=Math.round((bookedSlots/ALL_SLOTS.length)*100);
-      let statusBadge='';
-      if(isMaint) statusBadge='<div class="uc-badge-maint">🔧 Maintenance</div>';
-      else if(bookedSlots>0) statusBadge=`<div class="uc-badge-booked">🎮 ${bookedSlots} slot terisi</div>`;
-      else statusBadge='<div class="uc-badge-avail">✅ Tersedia</div>';
-      return `<div class="unit-card ${isMaint?'maint':''}">
-        <span class="uc-ico">${meta.icon}</span>
-        <div class="uc-name">${u.nama}</div>
-        <div class="uc-cat">${u.kategori}</div>
-        <div class="uc-price">${Rp(getHarga(u,today()))}/jam <span style='font-size:.58rem;color:var(--text3);font-weight:400'>(${isWeekend(today())?'weekend':'weekday'})</span></div>
-        <div class="uc-status">${statusBadge}</div>
-        ${!isMaint&&bookedSlots>0?`<div class="uc-slot-info">
-          <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin:0 0 3px"><div style="height:4px;background:${pct>70?'var(--red)':'var(--pink-l)'};border-radius:2px;width:${pct}%"></div></div>
-          ${bookedSlots}/${ALL_SLOTS.length} slot hari ini
-        </div>`:''}
-        <div class="uc-actions">
-          <button class="btn btn-ghost btn-sm" style="flex:1" onclick="editUnit('${u.id}')">✏️ Edit</button>
-          <button class="btn btn-sm ${isMaint?'btn-success':'btn-danger'}" onclick="toggleMaint('${u.id}')">${isMaint?'✅ Aktifkan':'🔧 Maintenance'}</button>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  function editUnit(id){
-    const u=getUnits().find(x=>x.id===id); if(!u) return;
-    document.getElementById('e-id').value=id;
-    document.getElementById('e-nama').value=u.nama;
-
-    document.getElementById('e-status').value=u.status_unit;
-    openM('m-edit');
-  }
-  function saveEdit(){
-    const id=document.getElementById('e-id').value;
-    const nama=document.getElementById('e-nama').value.trim();
-    const status=document.getElementById('e-status').value;
-    if(!nama){ toast('❌ Isi nama unit!'); return; }
-    const units=getUnits(); const idx=units.findIndex(u=>u.id===id); if(idx===-1) return;
-    units[idx]={...units[idx],nama,status_unit:status};
-    saveUnits(units); closeM('m-edit'); toast('✅ Unit diperbarui!'); render();
-  }
-  function toggleMaint(id){
-    const units=getUnits(); const idx=units.findIndex(u=>u.id===id); if(idx===-1) return;
-    const newStatus=units[idx].status_unit==='maintenance'?'available':'maintenance';
-    units[idx].status_unit=newStatus; saveUnits(units);
-    toast(newStatus==='maintenance'?'🔧 Unit set ke Maintenance':'✅ Unit diaktifkan kembali'); render();
-  }
-
-  setInterval(render,10000); render();
+  const s = await requireAdminAsync(); if (!s) return;
+  fillAdminUser(s); buildSidebar(s.role, 'units.html'); initMobSidebar();
+  document.getElementById('btn-logout').onclick = e => { e.preventDefault(); doLogout(); };
+  await render();
+  setInterval(render, 10000);
 })();
+
+/* ── filter tabs ── */
+document.getElementById('filter-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.ftab'); if (!btn) return;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on'); curF = btn.dataset.f; renderGrid();
+});
+
+/* ── unit grid event delegation ── */
+document.getElementById('unit-grid').addEventListener('click', e => {
+  const editBtn  = e.target.closest('[data-edit]');
+  const maintBtn = e.target.closest('[data-maint]');
+  if (editBtn)  openEdit(editBtn.dataset.edit);
+  if (maintBtn) toggleMaint(maintBtn.dataset.maint);
+});
+
+/* ── modal ── */
+document.getElementById('btn-close-edit').addEventListener('click', () => closeM('m-edit'));
+document.getElementById('btn-save-edit').addEventListener('click', saveEdit);
+
+/* ── functions ── */
+async function render() {
+  try {
+    const data = await apiAsync('GET', '/api/units');
+    _units = data.units || [];
+    localStorage.setItem('sx_units', JSON.stringify(_units));
+  } catch { _units = getUnits(); }
+  renderGrid();
+}
+
+function renderGrid() {
+  const td = today();
+  const filtered = curF === 'SEMUA' ? _units : _units.filter(u => u.kategori === curF);
+  document.getElementById('st-tot').textContent = _units.length;
+  document.getElementById('st-av').textContent  = _units.filter(u => u.status_unit === 'available').length;
+  document.getElementById('st-mn').textContent  = _units.filter(u => u.status_unit === 'maintenance').length;
+  const bkToday = _units.filter(u => {
+    const b = getBookedSlots(); const p = getPendingSlots();
+    return ((b[u.id]?.[td]||[]).length + (p[u.id]?.[td]||[]).length) > 0;
+  }).length;
+  document.getElementById('st-bk').textContent = bkToday;
+
+  document.getElementById('unit-grid').innerHTML = filtered.map(u => {
+    const meta     = UNIT_META[u.kategori] || { icon:'🎮' };
+    const isMaint  = u.status_unit === 'maintenance';
+    const b        = getBookedSlots(); const p = getPendingSlots();
+    const bookedSl = new Set([...(b[u.id]?.[td]||[]), ...(p[u.id]?.[td]||[])]).size;
+    const pct      = Math.round((bookedSl / ALL_SLOTS.length) * 100);
+    let badge = '';
+    if (isMaint)       badge = '<div class="uc-badge-maint">🔧 Maintenance</div>';
+    else if (bookedSl) badge = `<div class="uc-badge-booked">🎮 ${bookedSl} slot terisi</div>`;
+    else               badge = '<div class="uc-badge-avail">✅ Tersedia</div>';
+    return `<div class="unit-card ${isMaint?'maint':''}">
+      <span class="uc-ico">${meta.icon}</span>
+      <div class="uc-name">${esc(u.nama)}</div>
+      <div class="uc-cat">${esc(u.kategori)}</div>
+      <div class="uc-price">${Rp(getHarga(u, td))}/jam</div>
+      <div class="uc-status">${badge}</div>
+      ${!isMaint && bookedSl ? `<div class="uc-slot-info">
+        <div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin:0 0 3px">
+          <div style="height:4px;background:${pct>70?'var(--red)':'var(--pink-l)'};border-radius:2px;width:${pct}%"></div>
+        </div>${bookedSl}/${ALL_SLOTS.length} slot hari ini</div>` : ''}
+      <div class="uc-actions">
+        <button class="btn btn-ghost btn-sm" style="flex:1" data-edit="${esc(u.id)}">✏️ Edit</button>
+        <button class="btn btn-sm ${isMaint?'btn-success':'btn-danger'}" data-maint="${esc(u.id)}">
+          ${isMaint ? '✅ Aktifkan' : '🔧 Maintenance'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openEdit(id) {
+  const u = _units.find(x => x.id === id); if (!u) return;
+  document.getElementById('e-id').value     = id;
+  document.getElementById('e-nama').value   = u.nama;
+  document.getElementById('e-status').value = u.status_unit;
+  openM('m-edit');
+}
+
+async function saveEdit() {
+  const id     = document.getElementById('e-id').value;
+  const nama   = document.getElementById('e-nama').value.trim();
+  const status = document.getElementById('e-status').value;
+  if (!nama) { toast('Isi nama unit!', 'warning'); return; }
+  const btn = document.getElementById('btn-save-edit');
+  btn.disabled = true; btn.textContent = '⏳ Menyimpan...';
+  try {
+    await apiAsync('PUT', '/api/units/' + encodeURIComponent(id), { nama, status_unit: status });
+    closeM('m-edit'); toast('✅ Unit diperbarui!', 'success'); await render();
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = '✅ Simpan Perubahan'; }
+}
+
+async function toggleMaint(id) {
+  const u = _units.find(x => x.id === id); if (!u) return;
+  const newStatus = u.status_unit === 'maintenance' ? 'available' : 'maintenance';
+  try {
+    await apiAsync('PUT', '/api/units/' + encodeURIComponent(id), { status_unit: newStatus });
+    toast(newStatus === 'maintenance' ? '🔧 Unit set Maintenance' : '✅ Unit diaktifkan', 'info');
+    await render();
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+}
 </script>
 </body>
 </html>

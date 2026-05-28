@@ -25,24 +25,32 @@
 <body>
 <div id="sb-ov" class="sb-overlay"></div>
 <div class="layout">
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
     <div class="sb-header"><div class="sb-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="sb-brand">Pinkz Gamez<br>Admin</div></div>
     <nav class="sb-nav" id="sb-nav"></nav>
-    <div class="sb-footer"><a href="login.html" onclick="doLogout()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> Log Out</a></div>
+    <div class="sb-footer"><a href="login.html" id="btn-logout">↩ Log Out</a></div>
   </aside>
   <div class="main">
     <div class="topbar">
       <div class="tb-title"><h1>Booking</h1><p>Semua booking online &amp; walk-in</p></div>
-      <div class="tb-right"><div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge" id="tb-role-badge">Staff</span><div class="tb-avatar" id="tb-avatar">?</div></div><button class="mob-btn" id="mob-btn"><svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <button class="btn btn-primary btn-sm btn-pill" onclick="openWI()">+ Walk-in</button></div>
+      <div class="tb-right">
+        <div class="tb-user"><span class="tb-name" id="tb-name">—</span><span class="tb-role-badge" id="tb-role-badge">Staff</span><div class="tb-avatar" id="tb-avatar">?</div></div>
+        <button class="mob-btn" id="mob-btn"><svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <button class="btn btn-primary btn-sm btn-pill" id="btn-walkin">+ Walk-in</button>
+      </div>
     </div>
     <div class="page">
-      <div class="action-bar"><div class="search-bar" style="max-width:280px"><span class="s-ico"><svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg></span><input type="text" placeholder="Cari nama / ID..." id="q" oninput="render()"/></div></div>
-      <div class="filter-tabs">
-        <button class="ftab on" onclick="setF(this,'all')">Semua</button>
-        <button class="ftab" onclick="setF(this,'pending')">⏳ Pending</button>
-        <button class="ftab" onclick="setF(this,'paid')">✅ Paid</button>
-        <button class="ftab" onclick="setF(this,'rejected')">❌ Rejected</button>
+      <div class="action-bar">
+        <div class="search-bar" style="max-width:280px">
+          <span class="s-ico"><svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg></span>
+          <input type="text" placeholder="Cari nama / ID..." id="q"/>
+        </div>
+      </div>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="ftab on" data-f="all">Semua</button>
+        <button class="ftab" data-f="pending">⏳ Pending</button>
+        <button class="ftab" data-f="paid">✅ Paid</button>
+        <button class="ftab" data-f="rejected">❌ Rejected</button>
       </div>
       <div class="tbl-wrap">
         <table><thead><tr><th>ID</th><th>Tipe</th><th>Pelanggan</th><th>Unit</th><th>Waktu</th><th>F&amp;B</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -55,17 +63,15 @@
 <!-- WALK-IN MODAL -->
 <div class="modal-bg" id="m-wi">
   <div class="modal" style="max-width:680px;max-height:94vh;overflow-y:auto">
-    <button class="modal-x" onclick="closeM('m-wi')">✕</button>
+    <button class="modal-x" id="btn-close-wi">✕</button>
     <div class="modal-title">🚶 Walk-in Booking</div>
     <div class="row2">
       <div class="fg"><label>Nama Pelanggan</label><input id="wi-nama" placeholder="Nama..."/></div>
       <div class="fg"><label>No. WhatsApp</label><input id="wi-wa" placeholder="08xxxxxxxxxx"/></div>
     </div>
     <div class="row2">
-      <div class="fg"><label>Unit</label>
-        <select id="wi-unit" onchange="wiUnitChg()"><option value="">-- Pilih Unit --</option></select>
-      </div>
-      <div class="fg"><label>Tanggal</label><input type="date" id="wi-tgl" onchange="wiRenderSlots()"/></div>
+      <div class="fg"><label>Unit</label><select id="wi-unit"><option value="">-- Pilih Unit --</option></select></div>
+      <div class="fg"><label>Tanggal</label><input type="date" id="wi-tgl"/></div>
     </div>
     <div id="wi-udesc" style="display:none;font-size:.74rem;color:var(--text2);margin-bottom:.7rem;padding:.5rem;background:rgba(236,72,153,.05);border-radius:var(--r)"></div>
     <div class="fg">
@@ -74,11 +80,11 @@
     </div>
     <div class="fg">
       <label>Makanan &amp; Minuman <span style="font-size:.7rem;color:var(--text3);font-weight:400">(opsional)</span></label>
-      <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin:.4rem 0">
-        <button class="fnb-tab on" onclick="wiSFnb('Semua',this)">Semua</button>
-        <button class="fnb-tab" onclick="wiSFnb('Makanan',this)">🍜</button>
-        <button class="fnb-tab" onclick="wiSFnb('Minuman',this)">🥤</button>
-        <button class="fnb-tab" onclick="wiSFnb('Cemilan',this)">🍪</button>
+      <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin:.4rem 0" id="fnb-tabs">
+        <button class="fnb-tab on" data-cat="Semua">Semua</button>
+        <button class="fnb-tab" data-cat="Makanan">🍜</button>
+        <button class="fnb-tab" data-cat="Minuman">🥤</button>
+        <button class="fnb-tab" data-cat="Cemilan">🍪</button>
       </div>
       <div class="fnb-wi-grid" id="wi-fnb"></div>
     </div>
@@ -92,18 +98,45 @@
       <div class="wi-sr" id="wis-fr" style="display:none"><span style="color:var(--text2)">F&amp;B</span><span id="wis-f">—</span></div>
       <div class="wi-st"><span>TOTAL</span><span id="wis-tot" style="color:var(--pink-l)">—</span></div>
     </div>
-    <button class="btn btn-primary btn-full" style="margin-top:1rem" onclick="submitWI()">✅ Simpan &amp; Konfirmasi</button>
+    <button class="btn btn-primary btn-full" style="margin-top:1rem" id="btn-submit-wi">✅ Simpan &amp; Konfirmasi</button>
   </div>
 </div>
 
+<!-- STRUK MODAL -->
 <div class="modal-bg" id="m-struk">
   <div class="modal" style="max-width:360px">
-    <button class="modal-x" onclick="closeM('m-struk')">✕</button>
+    <button class="modal-x" id="btn-close-struk">✕</button>
     <div class="modal-title">🖨️ Struk</div>
     <pre id="struk-c" style="background:#fff;color:#111;padding:1rem;border-radius:var(--r);font-family:monospace;font-size:.72rem;line-height:1.8;white-space:pre-wrap"></pre>
     <div style="display:flex;gap:.6rem;margin-top:.8rem">
-      <button class="btn btn-ghost" style="flex:1" onclick="window.print()">Cetak</button>
-      <button class="btn btn-primary" style="flex:1" onclick="closeM('m-struk')">Tutup</button>
+      <button class="btn btn-ghost" style="flex:1" id="btn-print">Cetak</button>
+      <button class="btn btn-primary" style="flex:1" id="btn-close-struk2">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT MODAL -->
+<div class="modal-bg" id="m-rj">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-x" id="btn-close-rj">✕</button>
+    <div class="modal-title" style="color:var(--red)">❌ Tolak Pembayaran</div>
+    <input type="hidden" id="rj-id"/>
+    <div class="fg">
+      <label>Alasan</label>
+      <select id="rj-sel">
+        <option>Nominal tidak sesuai</option>
+        <option>Screenshot tidak jelas</option>
+        <option>Bukti tidak valid</option>
+        <option>Lainnya</option>
+      </select>
+    </div>
+    <div class="fg" id="rj-oth" style="display:none">
+      <label>Alasan lainnya</label>
+      <input id="rj-txt" placeholder="Tulis alasan..."/>
+    </div>
+    <div style="display:flex;gap:.7rem">
+      <button class="btn btn-ghost" style="flex:1" id="btn-cancel-rj">Batal</button>
+      <button class="btn btn-danger" style="flex:1" id="btn-do-rj">❌ Tolak</button>
     </div>
   </div>
 </div>
@@ -111,141 +144,306 @@
 <div id="toast"></div>
 <script src="../js/app.js"></script>
 <script>
+/* ── state ── */
+const MON = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+let filt = 'all';
+let wiSS = [], wiFnbC = {}, wiFnbCat = 'Semua';
+
+/* ── init ── */
 (async () => {
-  const s=requireAdmin(); fillAdminUser(s); buildSidebar(s.role,'booking.html'); initMobSidebar();
-  const MON=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-  let filt='all', wiSS=[], wiFnbC={}, wiFnbCat='Semua';
-
-  function setF(el,f){ document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); filt=f; render(); }
-  async function render(){
-    await fetchState();
-    const q=document.getElementById('q').value.toLowerCase();
-    const all=getAllBookings().filter(b=>(filt==='all'||b.payment_status===filt)&&(!q||b.nama?.toLowerCase().includes(q)||b.id?.toLowerCase().includes(q)));
-    const CLS={'pending':'badge-yellow','paid':'badge-green','rejected':'badge-red'};
-    const LBL={'pending':'⏳ Pending','paid':'✅ Paid','rejected':'❌ Rejected'};
-    document.getElementById('tbody').innerHTML=all.length?all.map(b=>`
-      <tr>
-        <td style="font-size:.76rem"><b>${esc(b.id)}</b></td>
-        <td>${b.tipe_booking==='online'?'<span class="badge badge-purple" style="font-size:.58rem">🌐 Online</span>':'<span class="badge badge-blue" style="font-size:.58rem">🚶 Walk-in</span>'}</td>
-        <td style="font-size:.84rem">${esc(b.nama)}<br><span style="font-size:.68rem;color:var(--text3)">${esc(b.wa)}</span></td>
-        <td style="font-size:.78rem">${b.unitNama||'—'}</td>
-        <td style="font-size:.72rem">${esc(b.tglStr||b.tgl)}<br>${b.timeRange||'—'} (${b.dur}j)</td>
-        <td style="font-size:.72rem">${b.fnb&&b.fnb.length?b.fnb.map(f=>f.ico+' '+f.nama+'×'+f.qty).join('<br>'):'—'}</td>
-        <td><b style="font-size:.84rem">${Rp(b.total)}</b></td>
-        <td><span class="badge ${CLS[b.payment_status]||'badge-yellow'}">${LBL[b.payment_status]||'—'}</span></td>
-        <td style="display:flex;gap:4px;flex-wrap:wrap">
-          ${b.payment_status==='pending'?`<a href="pembayaran.html" class="btn btn-success btn-sm">✓</a>`:''}
-          ${b.payment_status==='paid'&&b.struk?`<button class="btn btn-ghost btn-sm" onclick="prt('${esc(b.id)}')">🖨</button>`:''}
-        </td>
-      </tr>`).join(''):`<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text3)">Tidak ada booking</td></tr>`;
-  }
-
-  function openWI(){
-    wiSS=[]; wiFnbC={};
-    const sel=document.getElementById('wi-unit');
-    const wiTgl=document.getElementById('wi-tgl').value||today(); sel.innerHTML='<option value="">-- Pilih Unit --</option>'+getUnits().filter(u=>u.status_unit==='available').map(u=>`<option value="${u.id}">${u.nama} — ${Rp(getHarga(u,wiTgl))}/jam</option>`).join('');
-    document.getElementById('wi-tgl').value=today();
-    document.getElementById('wi-udesc').style.display='none';
-    document.getElementById('wi-sum').style.display='none';
-    document.getElementById('wi-slots').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:.6rem;color:var(--text3);font-size:.76rem">Pilih unit &amp; tanggal dulu</div>';
-    wiFnbCat='Semua'; document.querySelectorAll('#m-wi .fnb-tab').forEach((t,i)=>{ t.className='fnb-tab'+(i===0?' on':''); });
-    wiRenderFnb(); openM('m-wi');
-  }
-
-  function wiUnitChg(){
-    const uid=document.getElementById('wi-unit').value;
-    const desc=document.getElementById('wi-udesc');
-    if(!uid){ desc.style.display='none'; wiSS=[]; wiRenderSlots(); wiUpdSum(); return; }
-    const u=getUnits().find(x=>x.id===uid);
-    if(u){ const meta=UNIT_META[u.kategori]||{}; desc.textContent=`${u.nama} — ${meta.desc||''}`; desc.style.display='block'; }
-    wiSS=[]; wiRenderSlots(); wiUpdSum();
-  }
-
-  function wiRenderSlots(){
-    const uid=document.getElementById('wi-unit').value, tgl=document.getElementById('wi-tgl').value;
-    const g=document.getElementById('wi-slots');
-    if(!uid||!tgl){ g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:.6rem;color:var(--text3);font-size:.76rem">Pilih unit &amp; tanggal dulu</div>'; return; }
-    g.innerHTML=''; const frag=document.createDocumentFragment();
-    ALL_SLOTS.forEach(slot=>{
-      const bk=isSlotBooked(uid,tgl,slot), pend=isSlotPending(uid,tgl,slot), on=wiSS.includes(slot);
-      const btn=document.createElement('button');
-      btn.className='sm-btn'+(on?' on':bk?' bk':pend?' pnd':'');
-      btn.textContent=slot;
-      if(bk||pend){ btn.disabled=true; }
-      else { btn.onclick=()=>wiTS(slot); }
-      frag.appendChild(btn);
-    }); g.appendChild(frag);
-  }
-
-  function wiTS(slot){
-    const uid=document.getElementById('wi-unit').value, tgl=document.getElementById('wi-tgl').value;
-    if(!uid||!tgl||isSlotBooked(uid,tgl,slot)||isSlotPending(uid,tgl,slot)) return;
-    const idx=wiSS.indexOf(slot);
-    if(idx===-1){
-      if(wiSS.length===0) wiSS.push(slot);
-      else{ const ai=ALL_SLOTS.indexOf(slot),ix=wiSS.map(s=>ALL_SLOTS.indexOf(s)).sort((a,b)=>a-b); if(ai===ix[0]-1||ai===ix[ix.length-1]+1) wiSS.push(slot); else{ toast('⚠️ Pilih sesi berurutan!'); return; } }
-    } else {
-      const ai=ALL_SLOTS.indexOf(slot),ix=wiSS.map(s=>ALL_SLOTS.indexOf(s)).sort((a,b)=>a-b);
-      if(ai===ix[0]||ai===ix[ix.length-1]) wiSS.splice(idx,1); else{ toast('⚠️ Hapus dari ujung!'); return; }
-    }
-    wiRenderSlots(); wiUpdSum();
-  }
-
-  function wiSFnb(cat,el){ wiFnbCat=cat; document.querySelectorAll('#m-wi .fnb-tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); wiRenderFnb(); }
-  function wiRenderFnb(){
-    const menu=getMenu().filter(m=>m.aktif&&(wiFnbCat==='Semua'||m.kategori===wiFnbCat));
-    document.getElementById('wi-fnb').innerHTML=menu.map(m=>{
-      const q=wiFnbC[m.id]||0;
-      return `<div class="fnb-wi-row"><span>${m.ico||''} ${m.nama}<br><span style="color:var(--pink-l);font-size:.65rem">${Rp(m.harga)}</span></span>
-        <div class="wi-qty"><button class="wi-qb" onclick="wiQ('${m.id}',-1)">−</button><div class="wi-qn" id="wiq-${m.id}">${q}</div><button class="wi-qb" onclick="wiQ('${m.id}',1)">+</button></div></div>`;
-    }).join('');
-  }
-  function wiQ(id,delta){ const it=getMenu().find(m=>m.id===id); if(!it) return; const nv=Math.max(0,(wiFnbC[id]||0)+delta); if(delta>0&&nv>it.stok){ toast('Stok habis'); return; } if(nv===0) delete wiFnbC[id]; else wiFnbC[id]=nv; const el=document.getElementById('wiq-'+id); if(el) el.textContent=nv; wiUpdSum(); }
-
-  function wiUpdSum(){
-    const uid=document.getElementById('wi-unit').value, tgl=document.getElementById('wi-tgl').value;
-    if(!uid||!tgl||wiSS.length===0){ document.getElementById('wi-sum').style.display='none'; return; }
-    const u=getUnits().find(x=>x.id===uid); if(!u) return;
-    const sorted=[...wiSS].sort((a,b)=>ALL_SLOTS.indexOf(a)-ALL_SLOTS.indexOf(b));
-    const sewa=hitungSewa(u,tgl,sorted.length);
-    const tR=sorted.length===1?sorted[0]:`${sorted[0].split('–')[0]}–${sorted[sorted.length-1].split('–')[1]}`;
-    const menu=getMenu(); let tfnb=0;
-    Object.entries(wiFnbC).forEach(([id,q])=>{ const it=menu.find(m=>m.id===id); if(it&&q>0) tfnb+=it.harga*q; });
-    document.getElementById('wis-u').textContent=u.nama+(sewa.isWeekend?' 🟡 Weekend':' 🔵 Weekday');
-    document.getElementById('wis-t').textContent=tR+(sewa.bonusJam>0?' (+'+sewa.bonusJam+'j bonus)':'');
-    document.getElementById('wis-p').textContent=Rp(sewa.total)+' ('+sewa.jamBayar+' jam × '+Rp(sewa.harga)+')';
-    document.getElementById('wis-tot').textContent=Rp(sewa.total+tfnb);
-    if(tfnb>0){ document.getElementById('wis-fr').style.display='flex'; document.getElementById('wis-f').textContent=Rp(tfnb); } else document.getElementById('wis-fr').style.display='none';
-    document.getElementById('wi-sum').style.display='block';
-  }
-
-  function submitWI(){
-    const nama=document.getElementById('wi-nama').value.trim(), wa=document.getElementById('wi-wa').value.trim();
-    const uid=document.getElementById('wi-unit').value, tgl=document.getElementById('wi-tgl').value;
-    const met=document.getElementById('wi-met').value;
-    if(!nama||!wa){ toast('❌ Isi nama & WA!'); return; }
-    if(!uid){ toast('❌ Pilih unit!'); return; }
-    if(!tgl){ toast('❌ Pilih tanggal!'); return; }
-    if(wiSS.length===0){ toast('❌ Pilih sesi!'); return; }
-    const u=getUnits().find(x=>x.id===uid);
-    const sorted=[...wiSS].sort((a,b)=>ALL_SLOTS.indexOf(a)-ALL_SLOTS.indexOf(b));
-    const dur=sorted.length, tps=u.harga*dur;
-    const tR=dur===1?sorted[0]:`${sorted[0].split('–')[0]}–${sorted[dur-1].split('–')[1]}`;
-    const d=new Date(tgl+'T00:00:00'), tglStr=`${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;
-    const menu=getMenu(); let tfnb=0; const fi=[];
-    Object.entries(wiFnbC).forEach(([id,q])=>{ const it=menu.find(m=>m.id===id); if(it&&q>0){ tfnb+=it.harga*q; fi.push({id:it.id,nama:it.nama,ico:it.ico||'',harga:it.harga,qty:q}); } });
-    const sewa=hitungSewa(u,tgl,sorted.length);
-    const bk={ id:'WI-'+Date.now(), unitId:uid, unitNama:u.nama, kategori:u.kategori, tgl, tglStr, slots:sorted, timeRange:tR, dur:sewa.jamBayar, jamMain:sewa.jamMain, bonusJam:sewa.bonusJam, isWeekend:sewa.isWeekend, nama, wa, catatan:'', metode:met, fnb:fi, total_ps:sewa.total, total_fnb:tfnb, total:sewa.total+tfnb, payment_status:'pending', booking_status:'pending', tipe_booking:'walkin', created_at:new Date().toISOString() };
-    const saved = API_ENABLED ? addBookingToStore(bk) : (markSlotPending(uid,tgl,sorted), addBookingToStore(bk));
-    if(!saved) return;
-    adminAccPayment(bk.id);
-    closeM('m-wi'); toast('✅ Walk-in '+bk.id+' dikonfirmasi!'); render();
-  }
-
-  function prt(id){ const b=getBookingById(id); if(!b||!b.struk){ toast('Struk belum ada'); return; } document.getElementById('struk-c').textContent=b.struk; openM('m-struk'); }
-
-  setInterval(render,5000); render();
+  const s = await requireAdminAsync(); if (!s) return;
+  fillAdminUser(s); buildSidebar(s.role, 'booking.html'); initMobSidebar();
+  document.getElementById('btn-logout').onclick = e => { e.preventDefault(); doLogout(); };
+  await render();
+  setInterval(render, 5000);
 })();
+
+/* ── event listeners ── */
+document.getElementById('filter-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.ftab'); if (!btn) return;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on'); filt = btn.dataset.f; render();
+});
+document.getElementById('q').addEventListener('input', render);
+document.getElementById('btn-walkin').addEventListener('click', openWI);
+document.getElementById('btn-close-wi').addEventListener('click', () => closeM('m-wi'));
+document.getElementById('btn-close-struk').addEventListener('click',  () => closeM('m-struk'));
+document.getElementById('btn-close-struk2').addEventListener('click', () => closeM('m-struk'));
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+document.getElementById('btn-close-rj').addEventListener('click',  () => closeM('m-rj'));
+document.getElementById('btn-cancel-rj').addEventListener('click', () => closeM('m-rj'));
+document.getElementById('btn-submit-wi').addEventListener('click', submitWI);
+document.getElementById('btn-do-rj').addEventListener('click', doRj);
+document.getElementById('wi-unit').addEventListener('change', wiUnitChg);
+document.getElementById('wi-tgl').addEventListener('change', wiRenderSlots);
+document.getElementById('rj-sel').addEventListener('change', function(){
+  document.getElementById('rj-oth').style.display = this.value === 'Lainnya' ? 'block' : 'none';
+});
+
+/* fnb tabs */
+document.getElementById('fnb-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.fnb-tab'); if (!btn) return;
+  document.querySelectorAll('#fnb-tabs .fnb-tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on'); wiFnbCat = btn.dataset.cat; wiRenderFnb();
+});
+
+/* fnb qty */
+document.getElementById('wi-fnb').addEventListener('click', e => {
+  const btn = e.target.closest('[data-fid]'); if (!btn) return;
+  wiQ(btn.dataset.fid, Number(btn.dataset.d));
+});
+
+/* slots */
+document.getElementById('wi-slots').addEventListener('click', e => {
+  const btn = e.target.closest('[data-slot]'); if (!btn || btn.disabled) return;
+  wiTS(btn.dataset.slot);
+});
+
+/* tabel ACC / Reject / Struk */
+document.getElementById('tbody').addEventListener('click', async e => {
+  const accBtn = e.target.closest('[data-acc]');
+  const rjBtn  = e.target.closest('[data-rj]');
+  const prtBtn = e.target.closest('[data-prt]');
+
+  if (accBtn) {
+    const id = accBtn.dataset.acc;
+    if (!confirm(`ACC pembayaran ${id}?`)) return;
+    accBtn.disabled = true; accBtn.textContent = '⏳...';
+    const ok = adminAccPayment(id);
+    if (ok) { toast('✅ Di-ACC!', 'success'); render(); }
+    else { toast('❌ Gagal', 'error'); accBtn.disabled = false; accBtn.textContent = '✓ ACC'; }
+  }
+  if (rjBtn) {
+    document.getElementById('rj-id').value = rjBtn.dataset.rj;
+    document.getElementById('rj-txt').value = '';
+    document.getElementById('rj-oth').style.display = 'none';
+    document.getElementById('rj-sel').selectedIndex = 0;
+    openM('m-rj');
+  }
+  if (prtBtn) {
+    const id = prtBtn.dataset.prt;
+    prtBtn.disabled = true; prtBtn.textContent = '⏳...';
+    const struk = await getStruk(id);
+    prtBtn.disabled = false; prtBtn.textContent = '🖨';
+    if (!struk) { toast('Struk belum tersedia', 'warning'); return; }
+    document.getElementById('struk-c').textContent = struk;
+    openM('m-struk');
+  }
+});
+
+/* ── render ── */
+async function render() {
+  const bookings = await fetchBookings();
+  const q = document.getElementById('q').value.toLowerCase();
+  const all = bookings.filter(b =>
+    (filt === 'all' || b.payment_status === filt) &&
+    (!q || (b.nama||'').toLowerCase().includes(q) || (b.id||'').toLowerCase().includes(q))
+  );
+  const CLS = { pending:'badge-yellow', paid:'badge-green', rejected:'badge-red', expired:'badge-gray' };
+  const LBL = { pending:'⏳ Pending', paid:'✅ Paid', rejected:'❌ Rejected', expired:'🕐 Expired' };
+  document.getElementById('tbody').innerHTML = all.length
+    ? all.map(b => {
+        const unitNama  = b.unitNama  || b.unit_nama  || '—';
+        const timeRange = b.timeRange || b.time_range || '—';
+        const tglStr    = b.tglStr    || b.tgl_str    || b.tgl || '';
+        const fnbArr    = b.fnb || [];
+        return `<tr>
+          <td style="font-size:.76rem"><b>${esc(b.id)}</b></td>
+          <td>${b.tipe_booking==='online'
+            ? '<span class="badge badge-purple" style="font-size:.58rem">🌐 Online</span>'
+            : '<span class="badge badge-blue" style="font-size:.58rem">🚶 Walk-in</span>'}</td>
+          <td style="font-size:.84rem">${esc(b.nama||'')}<br><span style="font-size:.68rem;color:var(--text3)">${esc(b.wa||'')}</span></td>
+          <td style="font-size:.78rem">${esc(unitNama)}</td>
+          <td style="font-size:.72rem">${esc(tglStr)}<br>${esc(timeRange)} (${b.dur||0}j)</td>
+          <td style="font-size:.72rem">${fnbArr.length ? fnbArr.map(f=>esc(f.ico||'')+' '+esc(f.nama)+'×'+f.qty).join('<br>') : '—'}</td>
+          <td><b style="font-size:.84rem">${Rp(b.total||0)}</b></td>
+          <td><span class="badge ${CLS[b.payment_status]||'badge-yellow'}">${LBL[b.payment_status]||b.payment_status}</span></td>
+          <td style="display:flex;gap:4px;flex-wrap:wrap">
+            ${b.payment_status==='pending' ? `
+              <button class="btn btn-success btn-sm" data-acc="${esc(b.id)}">✓ ACC</button>
+              <button class="btn btn-danger btn-sm" data-rj="${esc(b.id)}">✕</button>` : ''}
+            ${b.payment_status==='paid' ? `
+              <button class="btn btn-ghost btn-sm" data-prt="${esc(b.id)}">🖨</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text3)">Tidak ada booking</td></tr>';
+}
+
+function doRj() {
+  const id  = document.getElementById('rj-id').value;
+  const sel = document.getElementById('rj-sel').value;
+  const alasan = sel === 'Lainnya' ? (document.getElementById('rj-txt').value.trim() || 'Ditolak') : sel;
+  const btn = document.getElementById('btn-do-rj');
+  btn.disabled = true; btn.textContent = '⏳...';
+  const ok = adminRejectPayment(id, alasan);
+  btn.disabled = false; btn.textContent = '❌ Tolak';
+  if (ok) { closeM('m-rj'); toast('Ditolak', 'info'); render(); }
+  else toast('Gagal menolak', 'error');
+}
+
+/* ── Walk-in ── */
+function openWI() {
+  wiSS = []; wiFnbC = {};
+  const wiTgl = today();
+  document.getElementById('wi-tgl').value  = wiTgl;
+  document.getElementById('wi-nama').value = '';
+  document.getElementById('wi-wa').value   = '';
+  const sel = document.getElementById('wi-unit');
+  sel.innerHTML = '<option value="">-- Pilih Unit --</option>' +
+    getUnits().filter(u => u.status_unit === 'available').map(u =>
+      `<option value="${u.id}">${esc(u.nama)} — ${Rp(getHarga(u, wiTgl))}/jam</option>`
+    ).join('');
+  document.getElementById('wi-udesc').style.display = 'none';
+  document.getElementById('wi-sum').style.display   = 'none';
+  document.getElementById('wi-slots').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;padding:.6rem;color:var(--text3);font-size:.76rem">Pilih unit &amp; tanggal dulu</div>';
+  wiFnbCat = 'Semua';
+  document.querySelectorAll('#fnb-tabs .fnb-tab').forEach((t, i) => {
+    t.className = 'fnb-tab' + (i === 0 ? ' on' : '');
+  });
+  wiRenderFnb(); openM('m-wi');
+}
+
+function wiUnitChg() {
+  const uid  = document.getElementById('wi-unit').value;
+  const desc = document.getElementById('wi-udesc');
+  if (!uid) { desc.style.display = 'none'; wiSS = []; wiRenderSlots(); wiUpdSum(); return; }
+  const u = getUnits().find(x => x.id === uid);
+  if (u) { const meta = UNIT_META[u.kategori]||{}; desc.textContent = `${u.nama} — ${meta.desc||''}`; desc.style.display = 'block'; }
+  wiSS = []; wiRenderSlots(); wiUpdSum();
+}
+
+function wiRenderSlots() {
+  const uid = document.getElementById('wi-unit').value;
+  const tgl = document.getElementById('wi-tgl').value;
+  const g   = document.getElementById('wi-slots');
+  if (!uid || !tgl) {
+    g.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:.6rem;color:var(--text3);font-size:.76rem">Pilih unit &amp; tanggal dulu</div>';
+    return;
+  }
+  g.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  ALL_SLOTS.forEach(slot => {
+    const bk   = isSlotBooked(uid, tgl, slot);
+    const pend = isSlotPending(uid, tgl, slot);
+    const on   = wiSS.includes(slot);
+    const btn  = document.createElement('button');
+    btn.className    = 'sm-btn' + (on ? ' on' : bk ? ' bk' : pend ? ' pnd' : '');
+    btn.textContent  = slot;
+    btn.dataset.slot = slot;
+    btn.disabled     = bk || pend;
+    frag.appendChild(btn);
+  });
+  g.appendChild(frag);
+}
+
+function wiTS(slot) {
+  const uid = document.getElementById('wi-unit').value;
+  const tgl = document.getElementById('wi-tgl').value;
+  if (!uid || !tgl || isSlotBooked(uid, tgl, slot) || isSlotPending(uid, tgl, slot)) return;
+  const idx = wiSS.indexOf(slot);
+  if (idx === -1) {
+    if (wiSS.length === 0) { wiSS.push(slot); }
+    else {
+      const ai = ALL_SLOTS.indexOf(slot);
+      const ix = wiSS.map(s => ALL_SLOTS.indexOf(s)).sort((a, b) => a - b);
+      if (ai === ix[0] - 1 || ai === ix[ix.length-1] + 1) wiSS.push(slot);
+      else { toast('⚠️ Pilih sesi berurutan!', 'warning'); return; }
+    }
+  } else {
+    const ai = ALL_SLOTS.indexOf(slot);
+    const ix = wiSS.map(s => ALL_SLOTS.indexOf(s)).sort((a, b) => a - b);
+    if (ai === ix[0] || ai === ix[ix.length-1]) wiSS.splice(idx, 1);
+    else { toast('⚠️ Hapus dari ujung!', 'warning'); return; }
+  }
+  wiRenderSlots(); wiUpdSum();
+}
+
+function wiRenderFnb() {
+  const menu = getMenu().filter(m => m.aktif && (wiFnbCat === 'Semua' || m.kategori === wiFnbCat));
+  document.getElementById('wi-fnb').innerHTML = menu.map(m => {
+    const q = wiFnbC[m.id] || 0;
+    return `<div class="fnb-wi-row">
+      <span>${esc(m.ico||'')} ${esc(m.nama)}<br>
+      <span style="color:var(--pink-l);font-size:.65rem">${Rp(m.harga)}</span></span>
+      <div class="wi-qty">
+        <button class="wi-qb" data-fid="${esc(m.id)}" data-d="-1">−</button>
+        <div class="wi-qn" id="wiq-${esc(m.id)}">${q}</div>
+        <button class="wi-qb" data-fid="${esc(m.id)}" data-d="1">+</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function wiQ(id, delta) {
+  const it = getMenu().find(m => m.id === id); if (!it) return;
+  const nv = Math.max(0, (wiFnbC[id] || 0) + delta);
+  if (delta > 0 && nv > it.stok) { toast('Stok habis', 'warning'); return; }
+  if (nv === 0) delete wiFnbC[id]; else wiFnbC[id] = nv;
+  const el = document.getElementById('wiq-' + id); if (el) el.textContent = nv;
+  wiUpdSum();
+}
+
+function wiUpdSum() {
+  const uid = document.getElementById('wi-unit').value;
+  const tgl = document.getElementById('wi-tgl').value;
+  if (!uid || !tgl || wiSS.length === 0) { document.getElementById('wi-sum').style.display = 'none'; return; }
+  const u = getUnits().find(x => x.id === uid); if (!u) return;
+  const sorted = [...wiSS].sort((a, b) => ALL_SLOTS.indexOf(a) - ALL_SLOTS.indexOf(b));
+  const sewa   = hitungSewa(u, tgl, sorted.length);
+  const tR     = sorted.length === 1 ? sorted[0] : `${sorted[0].split('–')[0]}–${sorted[sorted.length-1].split('–')[1]}`;
+  let tfnb = 0;
+  Object.entries(wiFnbC).forEach(([id, q]) => {
+    const it = getMenu().find(m => m.id === id); if (it && q > 0) tfnb += it.harga * q;
+  });
+  document.getElementById('wis-u').textContent   = u.nama + (sewa.isWeekend ? ' 🟡 Weekend' : ' 🔵 Weekday');
+  document.getElementById('wis-t').textContent   = tR;
+  document.getElementById('wis-p').textContent   = Rp(sewa.total) + ' (' + sewa.jamBayar + ' jam × ' + Rp(sewa.harga) + ')';
+  document.getElementById('wis-tot').textContent = Rp(sewa.total + tfnb);
+  if (tfnb > 0) { document.getElementById('wis-fr').style.display = 'flex'; document.getElementById('wis-f').textContent = Rp(tfnb); }
+  else document.getElementById('wis-fr').style.display = 'none';
+  document.getElementById('wi-sum').style.display = 'block';
+}
+
+function submitWI() {
+  const nama = document.getElementById('wi-nama').value.trim();
+  const wa   = document.getElementById('wi-wa').value.trim();
+  const uid  = document.getElementById('wi-unit').value;
+  const tgl  = document.getElementById('wi-tgl').value;
+  const met  = document.getElementById('wi-met').value;
+  if (!nama || !wa) { toast('❌ Isi nama & WA!', 'warning'); return; }
+  if (!uid)         { toast('❌ Pilih unit!', 'warning');     return; }
+  if (!tgl)         { toast('❌ Pilih tanggal!', 'warning');  return; }
+  if (!wiSS.length) { toast('❌ Pilih sesi!', 'warning');     return; }
+
+  const u      = getUnits().find(x => x.id === uid);
+  const sorted = [...wiSS].sort((a, b) => ALL_SLOTS.indexOf(a) - ALL_SLOTS.indexOf(b));
+  const sewa   = hitungSewa(u, tgl, sorted.length);
+  const tR     = sorted.length === 1 ? sorted[0] : `${sorted[0].split('–')[0]}–${sorted[sorted.length-1].split('–')[1]}`;
+  const d      = new Date(tgl + 'T00:00:00');
+  const tglStr = `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;
+  let tfnb = 0; const fi = [];
+  Object.entries(wiFnbC).forEach(([id, q]) => {
+    const it = getMenu().find(m => m.id === id);
+    if (it && q > 0) { tfnb += it.harga * q; fi.push({ id:it.id, nama:it.nama, ico:it.ico||'', harga:it.harga, qty:q }); }
+  });
+
+  const bk = {
+    id: 'WI-' + Date.now(),
+    unitId: uid, unitNama: u.nama, kategori: u.kategori,
+    tgl, tglStr, slots: sorted, timeRange: tR,
+    dur: sewa.jamBayar, jamMain: sewa.jamMain, bonusJam: sewa.bonusJam, isWeekend: sewa.isWeekend,
+    nama, wa, catatan: '', metode: met, fnb: fi,
+    total_ps: sewa.total, total_fnb: tfnb, total: sewa.total + tfnb,
+    payment_status: 'pending', booking_status: 'pending',
+    tipe_booking: 'walkin', created_at: new Date().toISOString()
+  };
+
+  const saved = addBookingToStore(bk); if (!saved) return;
+  adminAccPayment(bk.id);
+  closeM('m-wi'); toast('✅ Walk-in ' + bk.id + ' dikonfirmasi!', 'success'); render();
+}
 </script>
 </body>
 </html>

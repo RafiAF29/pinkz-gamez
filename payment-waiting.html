@@ -5,19 +5,21 @@
   <title>Menunggu Konfirmasi — Pinkz Gamez</title>
   <link rel="stylesheet" href="css/main.css"/>
   <style>
-    .wait-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem; }
-    .wait-card{ width:100%; max-width:480px; background:var(--card); border:1px solid var(--border); border-radius:var(--r2); padding:2rem; text-align:center; }
-    .wait-ico{ font-size:3rem; margin-bottom:.8rem; }
-    .wait-title{ font-size:1.2rem; font-weight:800; margin-bottom:.3rem; }
-    .wait-sub{ color:var(--text2); font-size:.86rem; margin-bottom:1.5rem; }
-    .countdown{ font-size:2.5rem; font-weight:900; font-family:var(--pixel); color:var(--orange); margin:1rem 0; }
-    .cd-label{ font-size:.72rem; color:var(--text3); margin-top:-.5rem; margin-bottom:1.2rem; }
-    .bk-detail{ background:var(--card2); border:1px solid var(--border); border-radius:var(--r); padding:1rem; text-align:left; margin-bottom:1.2rem; }
-    .bk-row{ display:flex; justify-content:space-between; font-size:.82rem; padding:4px 0; }
-    .bk-row .lbl{ color:var(--text2); }
-    .bk-row .val{ font-weight:600; }
-    .expired-box{ background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); border-radius:var(--r); padding:1rem; margin-bottom:1rem; }
-    .qris-box{ background:rgba(236,72,153,.06); border:1px solid rgba(236,72,153,.2); border-radius:var(--r); padding:1rem; margin-bottom:1rem; font-size:.82rem; }
+    .wrap{min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:5.5rem 1rem 2rem}
+    .card{width:100%;max-width:480px}
+    .pay-title{font-size:1.3rem;font-weight:900;margin-bottom:.3rem}
+    .pay-sub{color:var(--text2);font-size:.87rem;margin-bottom:1.2rem}
+    .section{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;margin-bottom:1rem}
+    .section-title{font-size:.78rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem}
+    .dr{display:flex;justify-content:space-between;font-size:.83rem;padding:4px 0}
+    .dl{color:var(--text2)}.dv{font-weight:600}
+    .total-row{display:flex;justify-content:space-between;padding:10px 0 0;border-top:1px solid var(--border);margin-top:6px;font-weight:900;font-size:1rem}
+    .countdown{font-size:2.2rem;font-weight:900;font-family:var(--pixel);color:var(--orange);text-align:center;margin:.4rem 0}
+    .cd-sub{font-size:.72rem;color:var(--text3);text-align:center;margin-bottom:.3rem}
+    .status-paid{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:var(--r2);padding:1.5rem;text-align:center}
+    .status-expired{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--r2);padding:1.5rem;text-align:center}
+    .pulse{animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   </style>
 </head>
 <body>
@@ -28,45 +30,60 @@
   </div>
 </nav>
 
-<div class="wait-wrap">
-  <div class="wait-card" id="main-card">
-    <div class="wait-ico" id="w-ico">⏳</div>
-    <div class="wait-title" id="w-title">Menunggu Konfirmasi Admin</div>
-    <div class="wait-sub" id="w-sub">Selesaikan pembayaran dan kirim bukti ke admin</div>
+<div class="wrap">
+  <div class="card">
+    <div class="pay-title" id="w-title">⏳ Menunggu Konfirmasi Admin</div>
+    <div class="pay-sub" id="w-sub">Sudah transfer? Kirim bukti ke admin via WhatsApp dan tunggu konfirmasi.</div>
 
-    <div class="countdown" id="countdown">15:00</div>
-    <div class="cd-label">Waktu tersisa untuk konfirmasi pembayaran</div>
+    <!-- Paid -->
+    <div class="status-paid" id="box-paid" style="display:none">
+      <div style="font-size:3rem;margin-bottom:.5rem">✅</div>
+      <div style="font-weight:800;font-size:1.1rem;color:var(--green)">Pembayaran Dikonfirmasi!</div>
+      <div style="color:var(--text2);font-size:.85rem;margin-top:.3rem">Mengalihkan ke struk...</div>
+    </div>
 
-    <div class="bk-detail" id="bk-detail" style="display:none">
-      <div class="bk-row"><span class="lbl">ID Booking</span><span class="val" id="d-id">—</span></div>
-      <div class="bk-row"><span class="lbl">Nama</span><span class="val" id="d-nama">—</span></div>
-      <div class="bk-row"><span class="lbl">Unit</span><span class="val" id="d-unit">—</span></div>
-      <div class="bk-row"><span class="lbl">Tanggal</span><span class="val" id="d-tgl">—</span></div>
-      <div class="bk-row"><span class="lbl">Waktu</span><span class="val" id="d-time">—</span></div>
-      <div class="bk-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
-        <span class="lbl">Total</span>
-        <span class="val" style="color:var(--pink-l);font-size:1rem" id="d-total">—</span>
+    <!-- Expired -->
+    <div class="status-expired" id="box-expired" style="display:none">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">⏰</div>
+      <div style="font-weight:800;font-size:1rem;color:var(--red)">Waktu Habis</div>
+      <div style="color:var(--text2);font-size:.82rem;margin-top:.3rem">Booking dibatalkan otomatis.</div>
+      <a href="booking.html" class="btn btn-primary btn-pill" style="margin-top:1rem;display:inline-flex">Booking Ulang</a>
+    </div>
+
+    <!-- Main (pending) -->
+    <div id="box-main">
+      <!-- Countdown -->
+      <div class="section">
+        <div class="section-title">⏰ Batas Waktu Pembayaran</div>
+        <div class="countdown" id="countdown">15:00</div>
+        <div class="cd-sub">Booking dibatalkan otomatis jika tidak dikonfirmasi</div>
       </div>
-    </div>
 
-    <div class="qris-box" id="qris-box" style="display:none">
-      <div style="font-weight:700;margin-bottom:.3rem">💳 Cara Bayar:</div>
-      <div>1. Transfer ke rekening/QRIS yang diberikan admin</div>
-      <div>2. Screenshot bukti transfer</div>
-      <div>3. Klik tombol WhatsApp di bawah dan kirim bukti</div>
-    </div>
+      <!-- Status menunggu -->
+      <div class="section">
+        <div class="section-title">📡 Status</div>
+        <div style="display:flex;align-items:center;gap:.7rem;font-size:.84rem">
+          <div class="pulse" style="width:10px;height:10px;border-radius:50%;background:var(--orange);flex-shrink:0"></div>
+          <div>Menunggu konfirmasi admin. Halaman ini otomatis update setiap 10 detik.</div>
+        </div>
+      </div>
 
-    <div id="expired-box" class="expired-box" style="display:none">
-      <div style="color:var(--red);font-weight:700">⏰ Waktu Habis</div>
-      <div style="font-size:.8rem;color:var(--text2);margin-top:.3rem">Booking ini sudah expired. Silakan buat booking baru.</div>
-    </div>
+      <!-- Detail Booking -->
+      <div class="section">
+        <div class="section-title">📋 Detail Booking</div>
+        <div id="bk-detail"><div style="color:var(--text3);font-size:.82rem">Memuat...</div></div>
+      </div>
 
-    <div id="btn-area" style="display:flex;flex-direction:column;gap:.7rem">
-      <a id="btn-wa" href="#" class="btn btn-primary btn-full btn-pill" target="_blank" style="display:none">
-        💬 Kirim Bukti via WhatsApp
-      </a>
-      <a href="cek-booking.html" class="btn btn-ghost btn-full btn-pill">📋 Cek Status Booking</a>
-      <a href="index.html" class="btn btn-ghost btn-full btn-pill">🏠 Kembali ke Beranda</a>
+      <!-- Actions -->
+      <div style="display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.5rem">
+        <a id="btn-wa" href="#" target="_blank" class="btn btn-primary btn-full btn-pill" style="display:none;padding:.85rem">
+          💬 Kirim Bukti Transfer via WhatsApp
+        </a>
+        <a id="btn-back-pay" href="payment.html" class="btn btn-ghost btn-full btn-pill">
+          ← Kembali ke Halaman Pembayaran
+        </a>
+        <a href="cek-booking.html" class="btn btn-ghost btn-full btn-pill">📋 Cek Status Booking</a>
+      </div>
     </div>
   </div>
 </div>
@@ -75,104 +92,74 @@
 <script src="js/app.js"></script>
 <script>
 (async () => {
-  const params = new URLSearchParams(location.search);
+  const params    = new URLSearchParams(location.search);
   const bookingId = params.get('id');
-
   if (!bookingId) { location.href = 'index.html'; return; }
 
-  // Fetch booking dari server
+  document.getElementById('btn-back-pay').href = 'payment.html?id=' + encodeURIComponent(bookingId);
+
   let bk = null;
-  try {
-    const d = await apiAsync('GET', '/api/bookings/' + encodeURIComponent(bookingId));
-    bk = d?.booking;
-  } catch(e) {}
 
-  // Fallback ke localStorage jika server tidak bisa
-  if (!bk) {
-    const all = getAllBookings();
-    bk = all.find(b => b.id === bookingId);
-  }
-
-  if (!bk) { toast('Booking tidak ditemukan', 'error'); return; }
-
-  // Normalize field names MySQL vs JSON
-  const unitNama  = bk.unitNama  || bk.unit_nama  || '';
-  const tglStr    = bk.tglStr    || bk.tgl_str    || bk.tgl || '';
-  const timeRange = bk.timeRange || bk.time_range || '';
-
-  // Isi detail
-  document.getElementById('bk-detail').style.display = 'block';
-  document.getElementById('qris-box').style.display  = 'block';
-  document.getElementById('d-id').textContent    = bk.id;
-  document.getElementById('d-nama').textContent  = bk.nama;
-  document.getElementById('d-unit').textContent  = unitNama;
-  document.getElementById('d-tgl').textContent   = tglStr;
-  document.getElementById('d-time').textContent  = timeRange;
-  document.getElementById('d-total').textContent = Rp(bk.total);
-
-  // WA button — data dari backend
-  const btnWa = document.getElementById('btn-wa');
-  btnWa.href = waLink(bk);
-  btnWa.style.display = 'flex';
-
-  // Countdown
-  function updateCountdown() {
-    if (bk.payment_status === 'paid') {
-      // Sudah dibayar
-      document.getElementById('w-ico').textContent   = '✅';
-      document.getElementById('w-title').textContent = 'Pembayaran Dikonfirmasi!';
-      document.getElementById('w-sub').textContent   = 'Booking kamu sudah aktif.';
-      document.getElementById('countdown').style.display = 'none';
-      document.querySelector('.cd-label').style.display  = 'none';
-      return;
-    }
-    if (bk.payment_status === 'expired' || bk.payment_status === 'cancelled') {
-      document.getElementById('countdown').style.display  = 'none';
-      document.querySelector('.cd-label').style.display   = 'none';
-      document.getElementById('expired-box').style.display = 'block';
-      document.getElementById('qris-box').style.display   = 'none';
-      document.getElementById('btn-wa').style.display     = 'none';
-      return;
-    }
-
-    const expiresAt = bk.expires_at ? new Date(bk.expires_at).getTime() : Date.now() + 15*60*1000;
-    const now       = Date.now();
-    const remaining = Math.max(0, expiresAt - now);
-
-    if (remaining === 0) {
-      document.getElementById('countdown').textContent   = '00:00';
-      document.getElementById('expired-box').style.display = 'block';
-      document.getElementById('qris-box').style.display  = 'none';
-      document.getElementById('btn-wa').style.display    = 'none';
-      return;
-    }
-
-    const m = Math.floor(remaining / 60000);
-    const s = Math.floor((remaining % 60000) / 1000);
-    const cd = document.getElementById('countdown');
-    cd.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-    // Warna merah kalau < 3 menit
-    if (remaining < 3 * 60000) cd.style.color = 'var(--red)';
-  }
-
-  updateCountdown();
-  const cdInterval = setInterval(updateCountdown, 1000);
-
-  // Auto-refresh status dari server setiap 10 detik
-  setInterval(async () => {
+  async function fetchBk() {
     try {
       const d = await apiAsync('GET', '/api/bookings/' + encodeURIComponent(bookingId));
-      if (d?.booking) {
-        bk = d.booking;
-        updateCountdown();
-        if (bk.payment_status === 'paid') {
-          clearInterval(cdInterval);
-          setTimeout(() => { location.href = 'cek-booking.html'; }, 2000);
-        }
-      }
+      bk = d?.booking;
     } catch {}
-  }, 10000);
+  }
+
+  function updateUI() {
+    if (!bk) return;
+
+    if (bk.payment_status === 'paid') {
+      document.getElementById('box-main').style.display    = 'none';
+      document.getElementById('box-expired').style.display = 'none';
+      document.getElementById('box-paid').style.display    = 'block';
+      document.getElementById('w-title').textContent       = '✅ Pembayaran Dikonfirmasi!';
+      document.getElementById('w-sub').textContent         = 'Terima kasih! Selamat main di Pinkz Gamez.';
+      setTimeout(() => { location.href = 'payment-success.html?id=' + encodeURIComponent(bookingId); }, 1500);
+      return;
+    }
+
+    if (['expired','cancelled','rejected'].includes(bk.payment_status)) {
+      document.getElementById('box-main').style.display    = 'none';
+      document.getElementById('box-paid').style.display    = 'none';
+      document.getElementById('box-expired').style.display = 'block';
+      return;
+    }
+
+    const unitNama  = bk.unitNama  || bk.unit_nama  || '—';
+    const tglStr    = bk.tglStr    || bk.tgl_str    || bk.tgl || '';
+    const timeRange = bk.timeRange || bk.time_range || '—';
+
+    document.getElementById('bk-detail').innerHTML = `
+      <div class="dr"><span class="dl">ID Booking</span><span class="dv" style="font-size:.75rem;font-family:monospace">${esc(bk.id)}</span></div>
+      <div class="dr"><span class="dl">Nama</span><span class="dv">${esc(bk.nama)}</span></div>
+      <div class="dr"><span class="dl">Unit</span><span class="dv">${esc(unitNama)}</span></div>
+      <div class="dr"><span class="dl">Tanggal</span><span class="dv">${esc(tglStr)}</span></div>
+      <div class="dr"><span class="dl">Waktu</span><span class="dv">${esc(timeRange)} (${bk.dur||0} jam)</span></div>
+      <div class="total-row"><span>Total</span><span style="color:var(--pink-l)">${Rp(bk.total)}</span></div>`;
+
+    const btnWa = document.getElementById('btn-wa');
+    btnWa.href = waLink(bk);
+    btnWa.style.display = 'flex';
+  }
+
+  function startCountdown() {
+    if (!bk) return;
+    const expiresAt = bk.expires_at ? new Date(bk.expires_at).getTime() : Date.now() + 15*60*1000;
+    const cd = document.getElementById('countdown');
+    const iv = setInterval(() => {
+      const rem = Math.max(0, expiresAt - Date.now());
+      const m = Math.floor(rem / 60000);
+      const s = Math.floor((rem % 60000) / 1000);
+      cd.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      if (rem < 3 * 60000) cd.style.color = 'var(--red)';
+      if (rem === 0) clearInterval(iv);
+    }, 1000);
+  }
+
+  await fetchBk(); updateUI(); startCountdown();
+  setInterval(async () => { await fetchBk(); updateUI(); }, 10000);
 })();
 </script>
 </body>

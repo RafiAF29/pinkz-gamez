@@ -90,9 +90,8 @@
           <div class="step-hdr"><div class="step-n">1</div><span>Pilih Unit</span></div>
           <div class="cat-tabs" id="cat-tabs">
             <button class="cat-tab on" onclick="setCat('SEMUA',this)">🎮 Semua</button>
-            <button class="cat-tab" onclick="setCat('PS4',this)">🎮 Reguler B</button>
-            <button class="cat-tab" onclick="setCat('PS5',this)">👑 VIP Room</button>
-            <button class="cat-tab" onclick="setCat('NINTENDO',this)">🎯 Nintendo</button>
+            <button class="cat-tab" onclick="setCat('PS4',this)">🎮 PS4 (Lt.1)</button>
+            <button class="cat-tab" onclick="setCat('PS5',this)">🕹️ PS5 (Lt.2)</button>
           </div>
           <div class="unit-grid" id="unit-grid"></div>
           <div id="unit-desc" style="display:none;margin-top:.8rem;padding:.7rem;background:rgba(236,72,153,.05);border:1px solid rgba(236,72,153,.12);border-radius:var(--r);font-size:.78rem;color:var(--text2);line-height:1.6"></div>
@@ -104,7 +103,7 @@
           <div id="we-banner" style="display:none" class="weekend-banner">
             <span style="font-size:1.2rem">🎉</span>
             <div><strong>Weekend — Harga Spesial!</strong><br>
-            <span style="font-size:.74rem">Berlaku harga weekend. Bonus <strong>+1 jam gratis</strong> untuk TV, Reguler B &amp; VIP Room!</span></div>
+            <span style="font-size:.74rem">Berlaku harga weekend untuk PS4 &amp; PS5.</span></div>
           </div>
           <div class="date-row" style="margin-bottom:1rem">
             <button class="date-nav" onclick="chgDate(-1)">&#8249;</button>
@@ -164,7 +163,6 @@
             <div class="sum-row"><span class="sum-lbl">Tipe Hari</span><span class="sum-val" id="sv-hari">—</span></div>
             <div class="sum-row"><span class="sum-lbl">Waktu</span><span class="sum-val" id="sv-time">—</span></div>
             <div class="sum-row"><span class="sum-lbl">Bayar</span><span class="sum-val" id="sv-dur">—</span></div>
-            <div id="sv-bonus-row" class="bonus-row" style="display:none">🎉 <span id="sv-bonus-txt">+1 jam gratis!</span></div>
             <div class="sum-row"><span class="sum-lbl">Total Jam Main</span><span class="sum-val" id="sv-jam-main">—</span></div>
             <div class="sum-row"><span class="sum-lbl">Harga/Jam</span><span class="sum-val" id="sv-harga">—</span></div>
             <div class="sum-row"><span class="sum-lbl">Sewa PS</span><span class="sum-val" id="sv-ps">—</span></div>
@@ -250,8 +248,7 @@
     const h=getHarga(su,sd);
     const we=isWeekend(sd);
     const desc=document.getElementById('unit-desc');
-    const bonus=(we&&(su.kategori==='TV'||su.kategori==='PS4'||su.kategori==='PS5'))?'<span style="color:var(--orange);font-weight:700"> · 🎉 +1 jam gratis di weekend</span>':'';
-    desc.innerHTML=`<strong>${su.nama}</strong> — ${meta.desc}${bonus}`;
+    desc.innerHTML=`<strong>${su.nama}</strong> — ${meta.desc}`;
     desc.style.display='block';
     document.getElementById('h-slot-info').textContent=`${Rp(h)}/jam${we?' (weekend)':' (weekday)'}`;
     ss=[]; renderSlots(); updSum();
@@ -343,11 +340,7 @@
     document.getElementById('sv-total').textContent=Rp(sewa.total+tfnb);
     document.getElementById('sum-empty').style.display='none';
     document.getElementById('sum-det').style.display='block';
-    // Bonus row
-    if(sewa.bonusJam>0){
-      document.getElementById('sv-bonus-row').style.display='flex';
-      document.getElementById('sv-bonus-txt').textContent=`+${sewa.bonusJam} jam gratis! (total main ${sewa.jamMain} jam)`;
-    } else { document.getElementById('sv-bonus-row').style.display='none'; }
+
     if(fi.length>0){
       document.getElementById('sv-fnb-wrap').style.display='block';
       document.getElementById('sv-fnb').textContent=Rp(tfnb);
@@ -386,9 +379,8 @@
     // Simpan booking via API langsung
     const saved = addBookingToStore(bk);
     if(!saved) return;
-    // Redirect ke payment-waiting dengan booking ID dari server
-    sessionStorage.setItem('last_booking_id', bk.id);
-    location.href = 'payment-waiting.html?id=' + encodeURIComponent(bk.id);
+    // Redirect ke payment.html (preview total + QRIS + instruksi)
+    location.href = 'payment.html?id=' + encodeURIComponent(bk.id);
   }
 
   renderUnits(); renderFnb(); updDate();
